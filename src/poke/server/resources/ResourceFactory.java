@@ -51,6 +51,7 @@ public class ResourceFactory {
 	public static void initialize(ServerConf cfg) {
 		try {
 			ResourceFactory.cfg = cfg;
+			System.out.println("INSIDE ResourceFactory-initialize CFG IS "+cfg);
 			factory.compareAndSet(null, new ResourceFactory());
 		} catch (Exception e) {
 			logger.error("failed to initialize ResourceFactory", e);
@@ -76,7 +77,9 @@ public class ResourceFactory {
 	 */
 	public Resource resourceInstance(Header header) {
 		// is the message for this server?
+		System.out.println("INSIDE ResourceFactory-resourceInstance");
 		if (header.hasToNode()) {
+			System.out.println("INSIDE ResourceFactory-resourceInstance header IS "+header);
 			String iam = cfg.getServer().getProperty("node.id");
 			if (iam.equalsIgnoreCase(header.getToNode()))
 				; // fall through and process normally

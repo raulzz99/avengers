@@ -20,6 +20,7 @@ import java.io.IOException;
 import poke.client.ClientConnection;
 import poke.client.ClientListener;
 import poke.client.ClientPrintListener;
+import poke.client.util.ClientUtil;
 
 public class Jab {
 	public Jab(String tag) {
@@ -29,8 +30,9 @@ public class Jab {
 		ClientConnection cc = ClientConnection.initConnection("localhost", 5570);
 		ClientListener listener = new ClientPrintListener("jab demo");
 		cc.addListener(listener);
-
+		
 		cc.poke("temp.txt");
+		
 		/*
 		for (int i = 0; i < 3; i++) {
 			count++;
@@ -43,7 +45,8 @@ public class Jab {
 		try {
 			Jab jab = new Jab("jab");
 			jab.run();
-
+			ClientUtil cu= new ClientUtil();
+			
 			// we are running asynchronously
 			System.out.println("\nExiting in 5 seconds");
 			Thread.sleep(5000);

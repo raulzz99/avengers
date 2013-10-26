@@ -63,6 +63,7 @@ public class PerChannelQueue implements ChannelQueue {
 	}
 
 	protected void init() {
+		System.out.println("INSIDE PerChannelQueue-INIT");
 		inbound = new LinkedBlockingDeque<com.google.protobuf.GeneratedMessage>();
 		outbound = new LinkedBlockingDeque<com.google.protobuf.GeneratedMessage>();
 
@@ -122,6 +123,7 @@ public class PerChannelQueue implements ChannelQueue {
 	@Override
 	public void enqueueRequest(Request req) {
 		try {
+			System.out.println("INSIDE PerChannelQueue -enqueueRequest() - REquest IS "+req) ;
 			inbound.put(req);
 		} catch (InterruptedException e) {
 			logger.error("message not enqueued for processing", e);
@@ -135,6 +137,7 @@ public class PerChannelQueue implements ChannelQueue {
 	 */
 	@Override
 	public void enqueueResponse(Response reply) {
+		System.out.println("INSIDE PerChannelQueue -enqueueResponse() - REPLY IS "+reply) ;
 		if (reply == null){
 			//logger.info("reply is null");
 			return;
@@ -236,7 +239,7 @@ public class PerChannelQueue implements ChannelQueue {
 					// process request and enqueue response
 					if (msg instanceof Request) {
 						Request req = ((Request) msg);
-
+						System.out.println("Inside percahnnel queue run() msg"+msg+" request "+req );
 						// do we need to route the request?
 
 						// handle it locally
@@ -249,6 +252,7 @@ public class PerChannelQueue implements ChannelQueue {
 									"Request not processed");
 						} else
 							reply = rsc.process(req);
+						
 
 						sq.enqueueResponse(reply);
 					}

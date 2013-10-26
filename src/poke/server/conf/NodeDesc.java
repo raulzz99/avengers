@@ -25,6 +25,7 @@ public class NodeDesc {
 	}
 
 	public void setNodeId(String nodeId) {
+		System.out.println("INSIDE NodeDesc-setNodeId() NODEID IS "+nodeId);
 		this.nodeId = nodeId;
 	}
 

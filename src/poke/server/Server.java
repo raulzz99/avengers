@@ -95,6 +95,8 @@ public class Server {
 
 	private void init(File cfg) {
 		// resource initialization - how message are processed
+		System.out.println(" INSIDE SERVER- init cfg is "+cfg);
+		
 		BufferedInputStream br = null;
 		try {
 			byte[] raw = new byte[(int) cfg.length()];
@@ -226,7 +228,7 @@ public class Server {
 		// manage hbMgr connections
 		HeartbeatConnector conn = HeartbeatConnector.getInstance();
 		conn.start();
-
+		System.out.println("system print testing of server -IGNORE");
 		logger.info("Server ready");
 	}
 
@@ -234,12 +236,14 @@ public class Server {
 	 * @param args
 	 */
 	public static void main(String[] args) {
+
 		if (args.length != 1) {
 			System.err.println("Usage: java " + Server.class.getClass().getName() + " conf-file");
-			System.exit(1);
+		//	System.exit(1);
 		}
 
 		File cfg = new File(args[0]);
+	//	File cfg = new File("runtime/ring/server0.conf");
 		if (!cfg.exists()) {
 			Server.logger.error("configuration file does not exist: " + cfg);
 			System.exit(2);

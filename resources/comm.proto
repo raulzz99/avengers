@@ -5,7 +5,7 @@ option java_package = "eye";
 message Finger {
 	required int32 number = 1;
 	required string tag = 2;
-	required int32 numbertwo = 3;
+//	required int32 numbertwo = 3;
 }
 
 message NameSpace {
@@ -36,6 +36,7 @@ message Document {
     optional int64 id = 2;
     optional NameValueSet document = 3;
     required bytes filedata = 4;
+    
 }
 
 message DocumentSet {

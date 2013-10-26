@@ -185,7 +185,7 @@ public class DatabaseStorage implements Storage {
 	}
 
 	@Override
-	public boolean addDocument(String namespace, Document doc) {
+	public boolean addDocument(String namespace, String doc) {
 		// TODO Auto-generated method stub
 		return false;
 	}

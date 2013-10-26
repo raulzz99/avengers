@@ -53,9 +53,10 @@ public class PokeResource implements Resource {
 		fb.setNumber(request.getBody().getFinger().getNumber());
 		pb.setFinger(fb.build());
 		rb.setBody(pb.build());
-
+		System.out.println("INSIDE PokeResource-process() REQUEST IS "+request);
+		
 		Response reply = rb.build();
-
+		System.out.println("INSIDE PokeResource-process() REPLY IS "+reply);
 		return reply;
 	}
 }

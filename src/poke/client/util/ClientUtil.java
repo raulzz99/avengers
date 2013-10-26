@@ -2,6 +2,7 @@ package poke.client.util;
 
 import com.google.protobuf.ByteString;
 
+import poke.demo.Jab;
 import poke.util.PrintNode;
 import eye.Comm.Document;
 import eye.Comm.Finger;
@@ -49,6 +50,7 @@ public class ClientUtil {
 	}
 
 	public static void printHeader(Header h) {
+		
 		System.out.println("-------------------------------------------------------");
 		System.out.println("Header");
 		System.out.println(" - Orig   : " + h.getOriginator());
@@ -56,6 +58,7 @@ public class ClientUtil {
 		System.out.println(" - Tag    : " + h.getTag());
 		System.out.println(" - Time   : " + h.getTime());
 		System.out.println(" - Status : " + h.getReplyCode());
+		
 		if (h.getReplyCode().getNumber() != eye.Comm.Header.ReplyStatus.SUCCESS_VALUE)
 			System.out.println(" - Re Msg : " + h.getReplyMsg());
 

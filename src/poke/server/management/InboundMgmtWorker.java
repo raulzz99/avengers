@@ -53,7 +53,7 @@ public class InboundMgmtWorker extends Thread {
 	public InboundMgmtWorker(ThreadGroup tgrp, int workerId) {
 		super(tgrp, "inbound-mgmt-" + workerId);
 		this.workerId = workerId;
-
+		System.out.println(" INSIDE InboundMgmtWorker" +tgrp+ " wrid id"+workerId);
 		if (ManagementQueue.outbound == null)
 			throw new RuntimeException("connection worker detected null queue");
 	}
@@ -66,7 +66,9 @@ public class InboundMgmtWorker extends Thread {
 
 			try {
 				// block until a message is enqueued
+				
 				ManagementQueueEntry msg = ManagementQueue.inbound.take();
+				System.out.println("InboundMgmtWorker run 1 -MSG IS "+msg);
 				logger.info("Inbound message received");
 				Management req = (Management) msg.req;
 				if (req.hasBeat()) {
@@ -79,9 +81,11 @@ public class InboundMgmtWorker extends Thread {
 					 * handled by the HeartbeatConnector.
 					 */
 					logger.info("Heartbeat received from " + req.getBeat().getNodeId());
+					System.out.println("InboundMgmtWorker run 1 -updated InboundHB IS "+req.getBeat().getNodeId());
 					HeartbeatManager.getInstance().updateInboundHB(req.getBeat().getNodeId());
 				} else if (req.hasGraph()) {
 					Network n = req.getGraph();
+					System.out.println("Network: node '" + n.getNodeId() + "' sent a " + n.getAction());
 					logger.info("Network: node '" + n.getNodeId() + "' sent a " + n.getAction());
 
 					/**

@@ -102,7 +102,7 @@ public class HeartMonitor {
 
 		bootstrap.setOption("connectTimeoutMillis", 10000);
 		bootstrap.setOption("keepAlive", true);
-
+		System.out.println("INSIDE HearMonitor: initUDP() ");
 		// Set up the pipeline factory.
 		if (handler != null) {
 			HeartPrintListener print = new HeartPrintListener(host + ":" + port);
@@ -115,7 +115,7 @@ public class HeartMonitor {
 	protected void initTCP() {
 		bootstrap = new ClientBootstrap(new NioClientSocketChannelFactory(Executors.newCachedThreadPool(),
 				Executors.newFixedThreadPool(2)));
-
+		System.out.println("INSIDE HearMonitor: initTCP() ");
 		bootstrap.setOption("connectTimeoutMillis", 10000);
 		bootstrap.setOption("tcpNoDelay", true);
 		bootstrap.setOption("keepAlive", true);
@@ -145,6 +145,7 @@ public class HeartMonitor {
 		channel.awaitUninterruptibly();
 
 		if (channel.isDone() && channel.isSuccess()) {
+			System.out.println("INSIDE HearMonitor: connect() ");
 			// TODO add detection of closed channel
 			return channel.getChannel();
 		} else {

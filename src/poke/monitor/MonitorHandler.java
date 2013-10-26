@@ -45,10 +45,16 @@ public class MonitorHandler extends SimpleChannelUpstreamHandler {
 	}
 
 	public String getNodeId() {
-		if (listeners.size() > 0)
+		System.out.println("INSIDE MonitorHandler - getNodeId() ");
+		if (listeners.size() > 0) {
+			System.out.println("INSIDE MonitorHandler - getNodeId() IS "+ listeners.values().iterator().next().getListenerID());
 			return listeners.values().iterator().next().getListenerID();
+		}
 		else if (channel != null)
+		{
+			System.out.println("INSIDE MonitorHandler - getNodeId() IS "+ channel.getLocalAddress().toString());
 			return channel.getLocalAddress().toString();
+	}
 		else
 			return String.valueOf(this.hashCode());
 	}
@@ -56,7 +62,7 @@ public class MonitorHandler extends SimpleChannelUpstreamHandler {
 	public void addListener(MonitorListener listener) {
 		if (listener == null)
 			return;
-
+		
 		listeners.putIfAbsent(listener.getListenerID(), listener);
 	}
 
@@ -64,6 +70,7 @@ public class MonitorHandler extends SimpleChannelUpstreamHandler {
 		// TODO a queue is needed to prevent overloading of the socket
 		// connection. For the demonstration, we don't need it
 		ChannelFuture cf = channel.write(msg);
+		System.out.println(" INSIDE MonitorHandler- SEND "+msg);
 		if (cf.isDone() && !cf.isSuccess()) {
 			logger.error("failed to poke!");
 			return false;
@@ -74,8 +81,9 @@ public class MonitorHandler extends SimpleChannelUpstreamHandler {
 
 	public void handleMessage(eye.Comm.Management msg) {
 		for (String id : listeners.keySet()) {
+			System.out.println("Inside MonitorHandler-handleMessage-handleMessage . msg is"+ msg);
 			MonitorListener ml = listeners.get(id);
-
+			System.out.println(" INSIDE MonitorHandler- handleMessage "+msg);
 			// TODO this may need to be delegated to a thread pool to allow
 			// async processing of replies
 			ml.onMessage(msg);

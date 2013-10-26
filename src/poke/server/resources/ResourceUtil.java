@@ -40,7 +40,7 @@ public class ResourceUtil {
 	 * @return The request with this server added to the routing path or null
 	 */
 	public static Request buildForwardMessage(Request req, ServerConf cfg) {
-
+		System.out.println("Inside ResrouceUtil- Request");
 		String iam = cfg.getServer().getProperty("node.id");
 		List<RoutingPath> paths = req.getHeader().getPathList();
 		if (paths != null) {
@@ -70,6 +70,7 @@ public class ResourceUtil {
 	 * @return
 	 */
 	public static Header buildHeaderFrom(Header reqHeader, ReplyStatus status, String statusMsg) {
+		System.out.println("Inside ResrouceUtil- buildHeaderFrom req header"+reqHeader+" status "+status+"status msg"+statusMsg);
 		return buildHeader(reqHeader.getRoutingId(), status, statusMsg, reqHeader.getOriginator(), reqHeader.getTag());
 	}
 
@@ -79,7 +80,7 @@ public class ResourceUtil {
 		bldr.setRoutingId(path);
 		bldr.setTag(tag);
 		bldr.setReplyCode(status);
-
+		System.out.println("Inside ResrouceUtil- buildHeader req path"+path+" status "+status+"from "+from+" tag "+tag);
 		if (msg != null)
 			bldr.setReplyMsg(msg);
 
@@ -91,6 +92,8 @@ public class ResourceUtil {
 	public static Response buildError(Header reqHeader, ReplyStatus status, String statusMsg) {
 		Response.Builder bldr = Response.newBuilder();
 		Header hdr = buildHeaderFrom(reqHeader, status, statusMsg);
+		
+		System.out.println("Inside ResrouceUtil- buildError req header"+reqHeader+" statusMesg "+statusMsg);
 		bldr.setHeader(hdr);
 		//bldr.setBody(value)
 		// TODO add logging

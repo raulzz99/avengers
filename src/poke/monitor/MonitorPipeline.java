@@ -44,7 +44,7 @@ public class MonitorPipeline implements ChannelPipelineFactory {
 
 		// our message processor
 		pipeline.addLast("handler", handler);
-
+		System.out.println("INSIDE MonitorPipelin - getPipeline() pipleline is "+pipeline);
 		return pipeline;
 	}
 }

@@ -39,14 +39,15 @@ public class Route {
 		ClientConnection cc = ClientConnection.initConnection("localhost", 5570);
 		ClientListener listener = new ClientPrintListener("jab demo");
 		cc.addListener(listener);
+		cc.poke_string(tag, count);
+		//cc.poke("temp.txt");
 		
-		cc.poke("temp.txt");
-		/*
-		for (int i = 0; i < 3; i++) {
+		/*for (int i = 0; i < 3; i++) {
 			count++;
-			cc.poke(tag, count);
-		});
-		*/
+			cc.poke_string(tag, count);
+		};*/
+		
+		
 	}
 
 	public static void main(String[] args) {

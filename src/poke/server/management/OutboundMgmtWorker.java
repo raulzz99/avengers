@@ -30,7 +30,7 @@ public class OutboundMgmtWorker extends Thread {
 	public OutboundMgmtWorker(ThreadGroup tgrp, int workerId) {
 		super(tgrp, "outbound-mgmt-" + workerId);
 		this.workerId = workerId;
-
+		System.out.println(" INSDIE OutboundMgmtWorker-OutboundMgmtWorker "+tgrp+" wrker id is "+workerId);
 		if (ManagementQueue.outbound == null)
 			throw new RuntimeException("management worker detected null queue");
 	}

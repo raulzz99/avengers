@@ -15,6 +15,9 @@
  */
 package poke.server.storage;
 
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.List;
 import java.util.Properties;
 
@@ -22,10 +25,25 @@ import eye.Comm.Document;
 import eye.Comm.NameSpace;
 
 public class NoOpStorage implements Storage {
-
+private String storage_path="/home/ramya/NoOpStorage/";
 	@Override
-	public boolean addDocument(String namespace, Document doc) {
-		// TODO Auto-generated method stub
+	public boolean addDocument(String fileName, String data) {
+		try {
+			File file = new File(storage_path+fileName);
+			
+			if (!file.exists()) {
+				 System.out.println("Creating file  "+fileName);
+				file.createNewFile();
+			}
+			FileWriter fw = new FileWriter(file.getAbsoluteFile(),true);
+
+			fw.write(data);
+			fw.close();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
 		return true;
 	}
 

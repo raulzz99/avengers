@@ -61,6 +61,7 @@ public class ManagementQueue {
 	public static void enqueueRequest(Management req, Channel ch,
 			SocketAddress sa) {
 		try {
+			System.out.println("ManagementQUEUE enqueueRequest-IGNORE req :"+req+", ch is:"+ch);
 			ManagementQueueEntry entry = new ManagementQueueEntry(req, ch, sa);
 			inbound.put(entry);
 		} catch (InterruptedException e) {
@@ -70,6 +71,7 @@ public class ManagementQueue {
 
 	public static void enqueueResponse(Management reply, Channel ch) {
 		try {
+			System.out.println("ManagementQUEUE enqueueResponse-IGNORE rep :"+reply+", ch is:"+ch);
 			ManagementQueueEntry entry = new ManagementQueueEntry(reply, ch,
 					null);
 			outbound.put(entry);
@@ -80,6 +82,7 @@ public class ManagementQueue {
 
 	public static class ManagementQueueEntry {
 		public ManagementQueueEntry(Management req, Channel ch, SocketAddress sa) {
+			System.out.println("ManagementQUEUE ManagementQueueEntry-IGNORE req :"+req+", ch is:"+ch+", sa is:"+sa);
 			this.req = req;
 			this.channel = ch;
 			this.sa = sa;

@@ -24,9 +24,7 @@ import java.io.InputStream;
 import java.net.InetSocketAddress;
 import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingDeque;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.nio.file.Path;
+import java.nio.*;
 
 import org.jboss.netty.bootstrap.ClientBootstrap;
 import org.jboss.netty.channel.Channel;
@@ -41,6 +39,7 @@ import com.google.protobuf.GeneratedMessage;
 import eye.Comm.Document;
 import eye.Comm.Finger;
 import eye.Comm.Header;
+import eye.Comm.NameSpace;
 import eye.Comm.Payload;
 import eye.Comm.Request;
 
@@ -120,31 +119,40 @@ public class ClientConnection {
 	public void poke(String filename) throws IOException {
 		
 		//Path path = Paths.get("/home/ankurthuse/Desktop/CMPE275/core-netty")
-		File file = new File("/home/ankurthuse/Desktop/CMPE275/core-netty/temp.txt");
+		File file = new File("/home/ramya/test.sh");
+		String file_name=file.getName();
+		System.out.println("file nmae is" +file_name);
 		InputStream ios = new FileInputStream(file);
 		 
 		while (true) {
 			byte[] filedata = read(ios);
+			
+			
 			if (filedata == null) {
 				return;
 			}
 			com.google.protobuf.ByteString fileinfo = ByteString.copyFrom(filedata);
-			//com.google.protobuf.ByteString fileinfo = doc.getFiledata();
+			
 			
 			// data to send
 			Document.Builder f = eye.Comm.Document.newBuilder();
-			f.setFiledata(fileinfo);
 			
+			f.setFiledata(fileinfo);
+			f.setFilename(file_name);
 			
 			// payload containing data
 			Request.Builder r = Request.newBuilder();
+			
 			eye.Comm.Payload.Builder p = Payload.newBuilder();
 			p.setDoc(f.build());
+			
 			r.setBody(p.build());
-	
+			
 			// header with routing info
 			eye.Comm.Header.Builder h = Header.newBuilder();
+			
 			h.setOriginator("client");
+			
 			h.setTime(System.currentTimeMillis());
 			h.setRoutingId(eye.Comm.Header.Routing.DOCADD);
 			
@@ -152,16 +160,21 @@ public class ClientConnection {
 	
 			eye.Comm.Request req = r.build();
 			
+			
 			try {
 				// enqueue message
 				outbound.put(req);
+				System.out.println("nsmapsace list is"+r.getBody().getDoc());//namespace.list
+				
+			
+				
 			} catch (InterruptedException e) {
 				logger.warn("Unable to deliver message, queuing");
 			}
 		}
 	}
-	/*
-	public void poke(String tag, int num) {
+	
+	public void poke_string(String tag, int num) {
 		// data to send
 		Finger.Builder f = eye.Comm.Finger.newBuilder();
 		f.setTag(tag);
@@ -190,7 +203,7 @@ public class ClientConnection {
 			logger.warn("Unable to deliver message, queuing");
 		}
 	}
-	*/
+	
 	private void init() {
 		// the queue to support client-side surging
 		outbound = new LinkedBlockingDeque<com.google.protobuf.GeneratedMessage>();

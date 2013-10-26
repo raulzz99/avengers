@@ -29,6 +29,7 @@ public class ServerConfTest {
 	@Test
 	public void testBasicConf() throws Exception {
 		ServerConf conf = new ServerConf();
+		
 		conf.addGeneral("node.id", "zero");
 		conf.addGeneral("port", "5570");
 		conf.addGeneral("port.mgmt", "5670");
@@ -77,6 +78,66 @@ public class ServerConfTest {
 		FileWriter fw = null;
 		try {
 			fw = new FileWriter(new File("/tmp/poke.cfg"));
+			fw.write(json);
+			fw.close();
+
+			System.out.println("JSON: " + json);
+		} finally {
+			fw.close();
+		}
+	}
+	@Test
+	public void testDocConf() throws Exception {
+		ServerConf conf = new ServerConf();
+		
+		conf.addGeneral("node.id", "zero");
+		conf.addGeneral("port", "5570");
+		conf.addGeneral("port.mgmt", "5670");
+		conf.addGeneral("storage", "poke.server.storage.NoOpsStorage");
+		conf.addGeneral("forward", "poke.server.routing.ForwardResource");
+
+		NodeDesc node = new NodeDesc();
+		node.setNodeId("one");
+		node.setPort(5571);
+		node.setMgmtPort(5671);
+		conf.addNearestNode(node);
+
+		node = new NodeDesc();
+		node.setNodeId("two");
+		node.setPort(5572);
+		node.setMgmtPort(5672);
+		conf.addNearestNode(node);
+
+		ResourceConf rsc = new ResourceConf();
+		rsc.setName("docs");
+		rsc.setId(Header.Routing.DOCADD_VALUE);
+		rsc.setClazz("poke.resources.PokeResource");
+		conf.addResource(rsc);
+
+		// we can have a resource support multiple requests by having duplicate
+		// entries map to the same class
+		rsc = new ResourceConf();
+		rsc.setName("namespace.list");
+		rsc.setId(Header.Routing.NAMESPACELIST_VALUE);
+		rsc.setClazz("poke.resources.NameSpaceResource");
+		conf.addResource(rsc);
+
+		rsc = new ResourceConf();
+		rsc.setName("namespace.add");
+		rsc.setId(Header.Routing.NAMESPACEADD_VALUE);
+		rsc = new ResourceConf();
+		rsc.setClazz("poke.resources.NameSpaceResource");
+		conf.addResource(rsc);
+
+		rsc.setName("namespace.remove");
+		rsc.setId(Header.Routing.NAMESPACEREMOVE_VALUE);
+		rsc.setClazz("poke.resources.NameSpaceResource");
+		conf.addResource(rsc);
+
+		String json = JsonUtil.encode(conf);
+		FileWriter fw = null;
+		try {
+			fw = new FileWriter(new File("/tmp/poke1.cfg"));
 			fw.write(json);
 			fw.close();
 

@@ -29,11 +29,11 @@ import eye.Comm.NameSpace;
  * @author gash
  * 
  */
-public class InMemoryStorage implements Storage {
-	private static String sNoName = "";
+public class InMemoryStorage {
+	/*private static String sNoName = "";
 	private HashMap<Long, DataNameSpace> data = new HashMap<Long, DataNameSpace>();
 
-	@Override
+	/*@Override
 	public boolean addDocument(String namespace, Document doc) {
 		if (doc == null)
 			return false;
@@ -226,5 +226,5 @@ public class InMemoryStorage implements Storage {
 	public void release() {
 		// TODO Auto-generated method stub
 		
-	}
+	}*/
 }
