@@ -192,7 +192,7 @@ public class HeartbeatManager extends Thread {
 		while (forever) {
 			try {
 				Thread.sleep(sHeartRate);
-
+				
 				// ignore until we have edges with other nodes
 				if (outgoingHB.size() > 0) {
 					// TODO verify known node's status

@@ -22,6 +22,7 @@ import org.jboss.netty.handler.codec.frame.LengthFieldBasedFrameDecoder;
 import org.jboss.netty.handler.codec.frame.LengthFieldPrepender;
 import org.jboss.netty.handler.codec.protobuf.ProtobufDecoder;
 import org.jboss.netty.handler.codec.protobuf.ProtobufEncoder;
+import org.jboss.netty.handler.stream.ChunkedWriteHandler;
 
 public class ClientDecoderPipeline implements ChannelPipelineFactory {
 	private ClientHandler handler = new ClientHandler();
@@ -30,6 +31,7 @@ public class ClientDecoderPipeline implements ChannelPipelineFactory {
 	}
 
 	public void addListener(ClientListener listener) {
+		System.out.println("Inside add listnere");
 		handler.addListener(listener);
 	}
 
@@ -44,7 +46,8 @@ public class ClientDecoderPipeline implements ChannelPipelineFactory {
 		pipeline.addLast("protobufDecoder", new ProtobufDecoder(eye.Comm.Response.getDefaultInstance()));
 		pipeline.addLast("frameEncoder", new LengthFieldPrepender(4));
 		pipeline.addLast("protobufEncoder", new ProtobufEncoder());
-
+		//Added chunked writer handler
+		//pipeline.addLast("chunkedWriter",new ChunkedWriteHandler());
 		/*
 		 * if we had only java clients then this is what we can use
 		 * pipeline.addLast("frameDecoder", new ProtobufVarint32FrameDecoder());

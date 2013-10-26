@@ -76,8 +76,10 @@ public class ResourceFactory {
 	 */
 	public Resource resourceInstance(Header header) {
 		// is the message for this server?
+		
 		if (header.hasToNode()) {
 			String iam = cfg.getServer().getProperty("node.id");
+				logger.info(" Value config whih is being used is " + iam );
 			if (iam.equalsIgnoreCase(header.getToNode()))
 				; // fall through and process normally
 			else {

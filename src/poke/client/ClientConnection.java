@@ -24,9 +24,9 @@ import java.io.InputStream;
 import java.net.InetSocketAddress;
 import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingDeque;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.nio.file.Path;
+//import java.nio.file.Files;
+//import java.nio.file.Paths;
+//import java.nio.file.Path;
 
 import org.jboss.netty.bootstrap.ClientBootstrap;
 import org.jboss.netty.channel.Channel;
@@ -60,6 +60,7 @@ public class ClientConnection {
 	ClientDecoderPipeline clientPipeline;
 	private LinkedBlockingDeque<com.google.protobuf.GeneratedMessage> outbound;
 	private OutboundWorker worker;
+	private static final int CHUNK_SIZE = 1024; 
 
 	protected ClientConnection(String host, int port) {
 		this.host = host;
@@ -90,6 +91,7 @@ public class ClientConnection {
 	public void addListener(ClientListener listener) {
 		try {
 			if (clientPipeline != null)
+				System.out.println("CLIENT CONNECTION class --- I am here");
 				clientPipeline.addListener(listener);
 		} catch (Exception e) {
 			logger.error("failed to add listener", e);
@@ -100,10 +102,10 @@ public class ClientConnection {
 		
 	    ByteArrayOutputStream ous = null;
 	    try {
-	        byte[] buffer = new byte[13];
+	        byte[] buffer = new byte[CHUNK_SIZE];
 	        ous = new ByteArrayOutputStream();
 	        
-	        int read = 13;
+	        int read = CHUNK_SIZE;
 	        if ( (read = ios.read(buffer)) != -1 ) {
 	        	ous.write(buffer, 0, read);
 	        }
@@ -120,7 +122,7 @@ public class ClientConnection {
 	public void poke(String filename) throws IOException {
 		
 		//Path path = Paths.get("/home/ankurthuse/Desktop/CMPE275/core-netty")
-		File file = new File("/home/ankurthuse/Desktop/CMPE275/core-netty/temp.txt");
+		File file = new File("/Users/raul/Desktop/temp.txt");
 		InputStream ios = new FileInputStream(file);
 		 
 		while (true) {
@@ -134,6 +136,7 @@ public class ClientConnection {
 			// data to send
 			Document.Builder f = eye.Comm.Document.newBuilder();
 			f.setFiledata(fileinfo);
+			
 			
 			
 			// payload containing data
@@ -205,10 +208,12 @@ public class ClientConnection {
 
 		// Set up the pipeline factory.
 		clientPipeline = new ClientDecoderPipeline();
+		System.out.println("Testing");
 		bootstrap.setPipelineFactory(clientPipeline);
 
 		// start outbound message processor
 		worker = new OutboundWorker(this);
+		System.out.println("Insid ethe worker thread");
 		worker.start();
 	}
 
@@ -220,7 +225,7 @@ public class ClientConnection {
 	protected Channel connect() {
 		// Start the connection attempt.
 		if (channel == null) {
-			// System.out.println("---> connecting");
+			
 			channel = bootstrap.connect(new InetSocketAddress(host, port));
 
 			// cleanup on lost connection
@@ -263,6 +268,7 @@ public class ClientConnection {
 			}
 
 			while (true) {
+				
 				if (!forever && conn.outbound.size() == 0)
 					break;
 

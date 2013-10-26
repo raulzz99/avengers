@@ -37,7 +37,7 @@ public class ClientHandler extends SimpleChannelUpstreamHandler {
 	protected static Logger logger = LoggerFactory.getLogger("client");
 	protected ConcurrentMap<String, ClientListener> listeners = new ConcurrentHashMap<String, ClientListener>();
 	private volatile Channel channel;
-
+	
 	public ClientHandler() {
 	}
 

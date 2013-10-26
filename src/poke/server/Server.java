@@ -35,15 +35,18 @@ import org.jboss.netty.channel.socket.nio.NioServerSocketChannelFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import poke.resources.DocumentResource;
 import poke.server.conf.JsonUtil;
 import poke.server.conf.NodeDesc;
 import poke.server.conf.ServerConf;
+import poke.server.conf.ServerConf.NearestConf;
 import poke.server.management.HeartbeatData;
 import poke.server.management.HeartbeatConnector;
 import poke.server.management.HeartbeatManager;
 import poke.server.management.ManagementDecoderPipeline;
 import poke.server.management.ManagementQueue;
 import poke.server.resources.ResourceFactory;
+import poke.server.routing.ForwardResource;
 import poke.server.routing.ServerDecoderPipeline;
 
 /**
@@ -64,7 +67,8 @@ public class Server {
 	protected static final ChannelGroup allChannels = new DefaultChannelGroup("server");
 	protected static HashMap<Integer, Bootstrap> bootstrap = new HashMap<Integer, Bootstrap>();
 	protected ChannelFactory cf, mgmtCF;
-	protected ServerConf conf;
+	public static ServerConf conf;
+	
 	protected HeartbeatManager hbMgr;
 
 	/**
@@ -95,6 +99,7 @@ public class Server {
 
 	private void init(File cfg) {
 		// resource initialization - how message are processed
+		//DocumentResource dr = new DocumentResource();
 		BufferedInputStream br = null;
 		try {
 			byte[] raw = new byte[(int) cfg.length()];
@@ -102,6 +107,7 @@ public class Server {
 			br.read(raw);
 			conf = JsonUtil.decode(new String(raw), ServerConf.class);
 			ResourceFactory.initialize(conf);
+			//dr.setCfg(conf);
 		} catch (Exception e) {
 		}
 
@@ -202,6 +208,7 @@ public class Server {
 		int port = Integer.parseInt(str);
 
 		str = conf.getServer().getProperty("port.mgmt");
+		logger.info("Port mgmt" +str);
 		int mport = Integer.parseInt(str);
 
 		// storage initialization
@@ -217,8 +224,13 @@ public class Server {
 		// establish nearest nodes and start receiving heartbeats
 		str = conf.getServer().getProperty("node.id");
 		hbMgr = HeartbeatManager.getInstance(str);
+		logger.info("AFTER hbmgr");
+		
+		
 		for (NodeDesc nn : conf.getNearest().getNearestNodes().values()) {
+			logger.info("Node id" + nn.getNodeId() + "Host" + nn.getHost() + "Port" + nn.getPort());
 			HeartbeatData node = new HeartbeatData(nn.getNodeId(), nn.getHost(), nn.getPort(), nn.getMgmtPort());
+			logger.info("Connecting node " + node.getNodeId());
 			HeartbeatConnector.getInstance().addConnectToThisNode(node);
 		}
 		hbMgr.start();

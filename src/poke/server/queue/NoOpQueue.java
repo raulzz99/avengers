@@ -38,6 +38,7 @@ public class NoOpQueue implements ChannelQueue {
 	@Override
 	public void shutdown(boolean hard) {
 		logger.info(queueName + ": queue shutting down");
+		
 	}
 
 	@Override

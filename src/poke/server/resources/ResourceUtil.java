@@ -17,6 +17,10 @@ package poke.server.resources;
 
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import poke.server.conf.NodeDesc;
 import poke.server.conf.ServerConf;
 import eye.Comm.Header;
 import eye.Comm.Header.ReplyStatus;
@@ -29,6 +33,7 @@ import eye.Comm.RoutingPath;
 
 public class ResourceUtil {
 
+	protected static Logger logger = LoggerFactory.getLogger("server");
 	/**
 	 * Build a forwarding request message. Note this will return null if the
 	 * server has already seen the request.
@@ -40,12 +45,16 @@ public class ResourceUtil {
 	 * @return The request with this server added to the routing path or null
 	 */
 	public static Request buildForwardMessage(Request req, ServerConf cfg) {
-
-		String iam = cfg.getServer().getProperty("node.id");
+		NodeDesc node = cfg.getNearest().getNearestNodes().values().iterator().next();
+		String iam = node.getNodeId();
+		//String iam = cfg.getServer().getProperty("node.id");
+		logger.info("vaue of iam is " +  iam);
 		List<RoutingPath> paths = req.getHeader().getPathList();
+		logger.info("Size of paths " +  paths.size());
 		if (paths != null) {
 			// if this server has already seen this message return null
 			for (RoutingPath rp : paths) {
+				logger.info("NODE IS " + rp.getNode());
 				if (iam.equalsIgnoreCase(rp.getNode()))
 					return null;
 			}
@@ -61,6 +70,7 @@ public class ResourceUtil {
 		return bldr.build();
 	}
 
+		
 	/**
 	 * build the response header from a request
 	 * 

@@ -20,9 +20,12 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import poke.server.Server;
+import poke.server.conf.JsonUtil;
 import poke.server.conf.NodeDesc;
 import poke.server.conf.ServerConf;
 import poke.server.resources.Resource;
+import poke.server.resources.ResourceFactory;
 import poke.server.resources.ResourceUtil;
 import eye.Comm.Finger;
 import eye.Comm.PayloadReply;
@@ -40,11 +43,12 @@ import eye.Comm.RoutingPath;
  * @author gash
  * 
  */
-public class ForwardResource implements Resource {
+public class ForwardResource implements Resource  {
 	protected static Logger logger = LoggerFactory.getLogger("server");
 
 	private ServerConf cfg;
-
+	
+	
 	public ServerConf getCfg() {
 		return cfg;
 	}
@@ -55,19 +59,24 @@ public class ForwardResource implements Resource {
 	 * @param cfg
 	 */
 	public void setCfg(ServerConf cfg) {
+		
 		this.cfg = cfg;
+		logger.info("Server Conf Value is  " + this.cfg);
 	}
 
 	@Override
 	public Response process(Request request) {
+		
 		String nextNode = determineForwardNode(request);
+		logger.info("Value returned by forward Node" + nextNode);
 		if (nextNode != null) {
+			logger.info("Next node is not null");
 			Request fwd = ResourceUtil.buildForwardMessage(request, cfg);
-
 			// TODO forward the request
 
 			return null;
 		} else {
+			logger.info("Next node is null");
 			Response reply = null;
 			// cannot forward the message - no edge or already traveled known
 			// edges
@@ -81,7 +90,9 @@ public class ForwardResource implements Resource {
 			fb.setNumber(request.getBody().getFinger().getNumber());
 			pb.setFinger(fb.build());
 			rb.setBody(pb.build());
-
+			
+			
+			
 			reply = rb.build();
 
 			return reply;
@@ -99,11 +110,16 @@ public class ForwardResource implements Resource {
 	 */
 	private String determineForwardNode(Request request) {
 		List<RoutingPath> paths = request.getHeader().getPathList();
+		
 		if (paths == null || paths.size() == 0) {
 			// pick first nearest
+			//Testing
+			//logger.info(this.getCfg().toString());
 			NodeDesc nd = cfg.getNearest().getNearestNodes().values().iterator().next();
+			logger.info("Returned Value " + nd.getNodeId());
 			return nd.getNodeId();
 		} else {
+			logger.info("Inside else block");
 			// if this server has already seen this message return null
 			for (RoutingPath rp : paths) {
 				for (NodeDesc nd : cfg.getNearest().getNearestNodes().values()) {
