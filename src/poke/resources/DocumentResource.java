@@ -36,7 +36,7 @@ import eye.Comm.Header.ReplyStatus;
 
 public class DocumentResource implements Resource {
 	protected static Logger logger = LoggerFactory.getLogger("server");
-	private ServerConf cfg = Server.conf;
+	//private ServerConf cfg = Server.conf;
 
 	@Override
 	public Response process(Request request) {
@@ -82,19 +82,19 @@ public class DocumentResource implements Resource {
 //		}
 	}
 	
-	public String determineForwardNode(Request request) {
-		List<RoutingPath> paths = request.getHeader().getPathList();
-		if(paths==null || paths.size() ==0 ){
-			logger.info("Inside deterimine Forward Node");
-//			logger.info(ResourceFactory.cfg.toString());
-			NodeDesc nd = cfg.getNearest().getNearestNodes().values().iterator().next();
-			int size = cfg.getNearest().getNearestNodes().size();
-			logger.info("Size is " + size);
-			
-			return nd.getNodeId();
-		}
-		return null;
-	}
+//	public String determineForwardNode(Request request) {
+//		List<RoutingPath> paths = request.getHeader().getPathList();
+//		if(paths==null || paths.size() ==0 ){
+//			logger.info("Inside deterimine Forward Node");
+////			logger.info(ResourceFactory.cfg.toString());
+//			NodeDesc nd = cfg.getNearest().getNearestNodes().values().iterator().next();
+//			int size = cfg.getNearest().getNearestNodes().size();
+//			logger.info("Size is " + size);
+//			
+//			return nd.getNodeId();
+//		}
+//		return null;
+//	}
 
 
 }

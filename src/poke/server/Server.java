@@ -68,13 +68,14 @@ public class Server {
 	protected static HashMap<Integer, Bootstrap> bootstrap = new HashMap<Integer, Bootstrap>();
 	protected ChannelFactory cf, mgmtCF;
 	public static ServerConf conf;
-	
+//	protected ServerConf conf;
 	protected HeartbeatManager hbMgr;
 
 	/**
 	 * static because we need to get a handle to the factory from the shutdown
 	 * resource
 	 */
+	
 	public static void shutdown() {
 		try {
 			ChannelGroupFuture grp = allChannels.close();
@@ -100,6 +101,7 @@ public class Server {
 	private void init(File cfg) {
 		// resource initialization - how message are processed
 		//DocumentResource dr = new DocumentResource();
+//		ForwardResource fr = new ForwardResource();
 		BufferedInputStream br = null;
 		try {
 			byte[] raw = new byte[(int) cfg.length()];
@@ -108,6 +110,7 @@ public class Server {
 			conf = JsonUtil.decode(new String(raw), ServerConf.class);
 			ResourceFactory.initialize(conf);
 			//dr.setCfg(conf);
+//			fr.setCfg(conf);
 		} catch (Exception e) {
 		}
 

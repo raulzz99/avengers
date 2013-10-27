@@ -15,15 +15,19 @@
  */
 package poke.server.routing;
 
+import org.jboss.netty.buffer.ChannelBuffers;
 import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelFuture;
 import org.jboss.netty.channel.ChannelFutureListener;
 import org.jboss.netty.channel.ChannelHandlerContext;
+import org.jboss.netty.channel.ChannelStateEvent;
 import org.jboss.netty.channel.ExceptionEvent;
 import org.jboss.netty.channel.MessageEvent;
 import org.jboss.netty.channel.SimpleChannelUpstreamHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.google.protobuf.GeneratedMessage;
 
 import poke.server.queue.ChannelQueue;
 import poke.server.queue.QueueFactory;
@@ -49,10 +53,24 @@ public class ServerHandler extends SimpleChannelUpstreamHandler {
 	protected static Logger logger = LoggerFactory.getLogger("server");
 
 	private ChannelQueue queue;
-
+	private volatile Channel channel;
+	
 	public ServerHandler() {
 		// logger.info("** ServerHandler created **");
 	}
+	
+	public boolean send(GeneratedMessage msg) {
+		// TODO a queue is needed to prevent overloading of the socket
+		// connection. For the demonstration, we don't need it
+		ChannelFuture cf = channel.write(msg);
+		if (cf.isDone() && !cf.isSuccess()) {
+			logger.error("failed to poke!");
+			return false;
+		}
+
+		return true;
+	}
+
 
 	/**
 	 * override this method to provide processing behavior
@@ -102,6 +120,18 @@ public class ServerHandler extends SimpleChannelUpstreamHandler {
 		logger.error("ServerHandler error, closing channel, reason: " + e.getCause(), e);
 		e.getCause().printStackTrace();
 		e.getChannel().close();
+	}
+	
+	@Override
+	public void channelOpen(ChannelHandlerContext ctx, ChannelStateEvent e) throws Exception {
+		channel = e.getChannel();
+		super.channelOpen(ctx, e);
+	}
+
+	@Override
+	public void channelClosed(ChannelHandlerContext ctx, ChannelStateEvent e) throws Exception {
+		if (channel.isConnected())
+			channel.write(ChannelBuffers.EMPTY_BUFFER).addListener(ChannelFutureListener.CLOSE);
 	}
 
 	public static class ConnectionClosedListener implements ChannelFutureListener {

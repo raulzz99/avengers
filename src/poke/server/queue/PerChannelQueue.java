@@ -265,10 +265,12 @@ public class PerChannelQueue implements ChannelQueue {
 							//logger.info("Reply value is " + reply.toString());
 						sq.enqueueResponse(reply);
 						
-						DocumentResource dr = (DocumentResource) rsc;
-						String nodeId = dr.determineForwardNode(req);
-						Request fwd = ResourceUtil.buildForwardMessage(req, Server.conf);
-						logger.info("FORWARDED STRING " + fwd.toString());
+						ForwardResource fr = new ForwardResource();
+						//String nodeId = dr.determineForwardNode(req);
+//						Request fwd = ResourceUtil.buildForwardMessage(req, Server.conf);
+						fr.process(req);
+						
+						
 //						new PerChannelQueue(conn)
 //						Resource resource = ResourceFactory.getInstance().resourceInstance(fwd.getHeader());
 //						Response r = null;
@@ -298,6 +300,7 @@ public class PerChannelQueue implements ChannelQueue {
 	}
 	
 	protected Channel createConnection(){
+		
 		return null;
 	}
 
