@@ -255,6 +255,8 @@ public class PerChannelQueue implements ChannelQueue {
 							
 							if((req.getBody().getDoc().getChunkId()) == (req.getBody().getDoc().getTotalChunk())){ //Check if MAX CHUNK has been reached
 								// process request and enqueue response
+								docStorer.saveFile(req.getBody().getDoc());
+								//store the file 
 								Response reply = null;
 								if (rsc == null) {
 									logger.error("failed to obtain resource for " + req);

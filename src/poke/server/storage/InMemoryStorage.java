@@ -15,6 +15,9 @@
  */
 package poke.server.storage;
 
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -68,7 +71,29 @@ public class InMemoryStorage implements Storage {
 		return output;
 				
 	}
-
+	public boolean saveFile(Document doc){
+		String storage_path = "/home/ankurthuse/Desktop/CMPE275/core-netty/";
+		String fileName = doc.getDocName()+"2.txt";
+		try {
+			File file = new File(storage_path+fileName);
+			if (!file.exists()) {
+				 System.out.println("Creating file  "+fileName);
+				 file.createNewFile();
+			}
+			FileWriter fw = new FileWriter(file.getAbsoluteFile(),true);
+			DataNameSpace dns = lookupByName(doc.getDocName());
+			for (Document doc1 : dns.data.values()){
+				com.google.protobuf.ByteString fileinfo = doc1.getChunkContent();
+				String s = new String(fileinfo.toByteArray());
+				fw.write(s);
+			}
+			fw.close();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return true;
+	}
 	@Override
 	public boolean removeDocument(String namespace, long docId) {
 		if (namespace == null)
