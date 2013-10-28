@@ -5,13 +5,11 @@ option java_package = "eye";
 message Finger {
 	required int32 number = 1;
 	required string tag = 2;
-	required int32 numbertwo = 3;
 }
 
 message NameSpace {
 	// internally created or supplied by caller
 	optional int64 id = 1; 
-	
 	required string name = 2;
 	optional string desc = 3;
 	optional int64 created = 4;
@@ -32,10 +30,13 @@ message NameValueSet {
 }
 
 message Document {
-    optional string name_space = 1;
+    optional string docName = 1;
     optional int64 id = 2;
     optional NameValueSet document = 3;
-    required bytes filedata = 4;
+    optional bytes chunkContent = 4;
+    optional int64 chunkId = 5;
+    optional int64 totalChunk = 6;
+    optional int64 docSize = 7;
 }
 
 message DocumentSet {
@@ -69,6 +70,7 @@ message Header {
 
     // if the message is for a specific node, this will be set
     optional string toNode = 8;
+    optional int64 remainingHopCount = 9;
 
     enum Routing {
         FINGER = 2;
@@ -81,6 +83,8 @@ message Header {
         DOCFIND = 21;
         DOCUPDATE = 22;
         DOCREMOVE = 23;
+        DOCADDHANDSHAKE = 24;
+        DOCQUERY = 25;
         }
         
      enum ReplyStatus {

@@ -32,10 +32,12 @@ import poke.server.resources.Resource;
 import poke.server.resources.ResourceFactory;
 import poke.server.resources.ResourceUtil;
 import poke.server.routing.ForwardResource;
+import poke.server.storage.InMemoryStorage;
 
 import com.google.protobuf.GeneratedMessage;
 
 import eye.Comm.Header.ReplyStatus;
+import eye.Comm.Header;
 import eye.Comm.Request;
 import eye.Comm.Response;
 
@@ -52,7 +54,7 @@ import eye.Comm.Response;
  */
 public class PerChannelQueue implements ChannelQueue {
 	protected static Logger logger = LoggerFactory.getLogger("server");
-
+	private InMemoryStorage docStorer = new InMemoryStorage();
 	private Channel channel;
 	private LinkedBlockingDeque<com.google.protobuf.GeneratedMessage> inbound;
 	private LinkedBlockingDeque<com.google.protobuf.GeneratedMessage> outbound;
@@ -228,8 +230,6 @@ public class PerChannelQueue implements ChannelQueue {
 		@Override
 		public void run() {
 			Channel conn = sq.channel;
-			
-			
 			if (conn == null || !conn.isOpen()) {
 				PerChannelQueue.logger.error("connection missing, no inbound communication");
 				return;
@@ -241,36 +241,43 @@ public class PerChannelQueue implements ChannelQueue {
 
 				try {
 					// block until a message is enqueued
-					GeneratedMessage msg = sq.inbound.take();
-
-					// process request and enqueue response
+					GeneratedMessage msg = sq.inbound.take(); //pop the request from queue
+					
 					if (msg instanceof Request) {
 						logger.info("Inbound Message");
-//						logger.info(msg.toString());
+
 						Request req = ((Request) msg);
-						FileOutputStream fos = new FileOutputStream("/Users/raul/Desktop/rahul.txt");
-//						logger.info(msg.toString());
-						fos.write(((Request) msg).getBody().getDoc().getFiledata().toByteArray());
-						fos.close();
-						// do we need to route the request?
 						Resource rsc = ResourceFactory.getInstance().resourceInstance(req.getHeader());
-						Response reply = null;
-						if (rsc == null) {
-							logger.error("failed to obtain resource for " + req);
-							reply = ResourceUtil.buildError(req.getHeader(), ReplyStatus.FAILURE,
-									"Request not processed");
-						} else
-							logger.info("Processing Request");
-							reply = rsc.process(req);
-							//logger.info("Reply value is " + reply.toString());
-						sq.enqueueResponse(reply);
 						
-						ForwardResource fr = new ForwardResource();
-						//String nodeId = dr.determineForwardNode(req);
-//						Request fwd = ResourceUtil.buildForwardMessage(req, Server.conf);
-						fr.process(req);
-						
-						
+						if (req.getHeader().getRoutingId() == Header.Routing.DOCADD) { //Check if Chunk Header == DOC ADD
+												
+							docStorer.addDocument(req.getBody().getSpace().getName(), req.getBody().getDoc());
+							
+							if((req.getBody().getDoc().getChunkId()) == (req.getBody().getDoc().getTotalChunk())){ //Check if MAX CHUNK has been reached
+								// process request and enqueue response
+								Response reply = null;
+								if (rsc == null) {
+									logger.error("failed to obtain resource for " + req);
+									reply = ResourceUtil.buildError(req.getHeader(), ReplyStatus.FAILURE,
+											"Request not processed");
+								} else
+									logger.info("Processing Request");
+									reply = rsc.process(req);
+									//logger.info("Reply value is " + reply.toString());
+								//fos.close();
+								sq.enqueueResponse(reply);
+								ForwardResource fr = new ForwardResource();
+								//String nodeId = dr.determineForwardNode(req);
+		//						Request fwd = ResourceUtil.buildForwardMessage(req, Server.conf);
+								fr.process(req);
+	/*
+								DocumentResource dr = (DocumentResource) rsc;
+								String nodeId = dr.determineForwardNode(req);
+								Request fwd = ResourceUtil.buildForwardMessage(req, Server.conf);
+								logger.info("FORWARDED STRING " + fwd.toString());
+*/
+							}
+						}
 //						new PerChannelQueue(conn)
 //						Resource resource = ResourceFactory.getInstance().resourceInstance(fwd.getHeader());
 //						Response r = null;

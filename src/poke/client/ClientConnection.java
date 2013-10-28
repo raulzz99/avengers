@@ -28,6 +28,7 @@ import java.util.concurrent.LinkedBlockingDeque;
 //import java.nio.file.Paths;
 //import java.nio.file.Path;
 
+
 import org.jboss.netty.bootstrap.ClientBootstrap;
 import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelFuture;
@@ -41,6 +42,7 @@ import com.google.protobuf.GeneratedMessage;
 import eye.Comm.Document;
 import eye.Comm.Finger;
 import eye.Comm.Header;
+import eye.Comm.NameSpace;
 import eye.Comm.Payload;
 import eye.Comm.Request;
 
@@ -60,7 +62,9 @@ public class ClientConnection {
 	ClientDecoderPipeline clientPipeline;
 	private LinkedBlockingDeque<com.google.protobuf.GeneratedMessage> outbound;
 	private OutboundWorker worker;
-	private static final int CHUNK_SIZE = 1024; 
+	private static final int CHUNK_SIZE = 12; 
+	private long FILE_SIZE = 0; 
+	private long TOTAL_CHUNK = 0; 
 
 	protected ClientConnection(String host, int port) {
 		this.host = host;
@@ -119,32 +123,46 @@ public class ClientConnection {
 	    return ous.toByteArray();
 	}
 	
-	public void poke(String filename) throws IOException {
+public void poke(String filename, String owner) throws IOException {
 		
-		//Path path = Paths.get("/home/ankurthuse/Desktop/CMPE275/core-netty")
-		File file = new File("/Users/raul/Desktop/temp.txt");
+		File file = new File("/home/ankurthuse/Desktop/CMPE275/core-netty/temp.txt");
 		InputStream ios = new FileInputStream(file);
-		 
-		while (true) {
+		
+		//File size in bytes
+		FILE_SIZE = file.length();
+		//Set totalchuck by dividing FILE_SIZE/65536 (divide by 12 for now)
+		TOTAL_CHUNK = FILE_SIZE/CHUNK_SIZE;
+
+		
+		for(long i=1; i<=TOTAL_CHUNK; i++)
+		{
+			NameSpace.Builder ns = eye.Comm.NameSpace.newBuilder();
 			byte[] filedata = read(ios);
 			if (filedata == null) {
 				return;
 			}
+			//if file chunk is not the first one then set the name of the namespace
+			
+			ns.setName("temp");
+			ns.setOwner(owner);
+			
 			com.google.protobuf.ByteString fileinfo = ByteString.copyFrom(filedata);
-			//com.google.protobuf.ByteString fileinfo = doc.getFiledata();
 			
 			// data to send
 			Document.Builder f = eye.Comm.Document.newBuilder();
-			f.setFiledata(fileinfo);
-			
+			f.setDocName("temp");
+			f.setChunkContent(fileinfo);
+			f.setChunkId(i);
+			f.setTotalChunk(TOTAL_CHUNK);
 			
 			
 			// payload containing data
 			Request.Builder r = Request.newBuilder();
 			eye.Comm.Payload.Builder p = Payload.newBuilder();
 			p.setDoc(f.build());
+			p.setSpace(ns.build());
 			r.setBody(p.build());
-	
+			
 			// header with routing info
 			eye.Comm.Header.Builder h = Header.newBuilder();
 			h.setOriginator("client");
@@ -163,37 +181,7 @@ public class ClientConnection {
 			}
 		}
 	}
-	/*
-	public void poke(String tag, int num) {
-		// data to send
-		Finger.Builder f = eye.Comm.Finger.newBuilder();
-		f.setTag(tag);
-		f.setNumber(num);
-
-		// payload containing data
-		Request.Builder r = Request.newBuilder();
-		eye.Comm.Payload.Builder p = Payload.newBuilder();
-		p.setFinger(f.build());
-		r.setBody(p.build());
-
-		// header with routing info
-		eye.Comm.Header.Builder h = Header.newBuilder();
-		h.setOriginator("client");
-		h.setTag("test finger");
-		h.setTime(System.currentTimeMillis());
-		h.setRoutingId(eye.Comm.Header.Routing.FINGER);
-		r.setHeader(h.build());
-
-		eye.Comm.Request req = r.build();
-
-		try {
-			// enqueue message
-			outbound.put(req);
-		} catch (InterruptedException e) {
-			logger.warn("Unable to deliver message, queuing");
-		}
-	}
-	*/
+	
 	private void init() {
 		// the queue to support client-side surging
 		outbound = new LinkedBlockingDeque<com.google.protobuf.GeneratedMessage>();

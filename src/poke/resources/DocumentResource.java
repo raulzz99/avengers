@@ -64,18 +64,14 @@ public class DocumentResource implements Resource {
 //			return null;
 //		} 
 //		else{
+		logger.info("INSIDE DOCUMENT RESOURCE RESPONSE PROCESS");
 		Response.Builder rb = Response.newBuilder();
 
 		// metadata
 		rb.setHeader(ResourceUtil.buildHeaderFrom(request.getHeader(), ReplyStatus.SUCCESS, null));
 		// payload
 		PayloadReply.Builder pb = PayloadReply.newBuilder();
-		NameSpace.Builder fb = NameSpace.newBuilder();
-		fb.setId(1);
-		fb.setName("Doc 1");
-		fb.setCreated(10132013);
-		pb.addSpaces(fb.build());
-		
+		pb.addSpaces(request.getBody().getSpace());
 		rb.setBody(pb.build());
 		Response reply = rb.build();
 		return reply;
