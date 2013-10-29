@@ -15,8 +15,13 @@
  */
 package poke.server.storage.jdbc;
 
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.sql.Connection;
+import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.List;
 import java.util.Properties;
 
@@ -38,17 +43,33 @@ public class DatabaseStorage implements Storage {
 	public static final String sUrl = "jdbc.url";
 	public static final String sUser = "jdbc.user";
 	public static final String sPass = "jdbc.password";
-
+	public static final String sTable_space = "namespace_info";
+	public static final String sDB="DB_Name";
 	protected Properties cfg;
 	protected BoneCP cpool;
 
 	protected DatabaseStorage() {
+		
 	}
 
 	public DatabaseStorage(Properties cfg) {
 		init(cfg);
 	}
-
+public static void main(String[] args) {
+	Properties prop = new Properties();
+	try {
+		prop.load(new FileInputStream("/home/ramya/git/avengers/Server_DB_properties.properties"));
+		DatabaseStorage db = new DatabaseStorage(prop);
+	} catch (FileNotFoundException e) {
+		// TODO Auto-generated catch block
+		e.printStackTrace();
+	} catch (IOException e) {
+		// TODO Auto-generated catch block
+		e.printStackTrace();
+	}
+	
+	
+}
 	@Override
 	public void init(Properties cfg) {
 		if (cpool != null)
@@ -60,11 +81,11 @@ public class DatabaseStorage implements Storage {
 			Class.forName(cfg.getProperty(sDriver));
 			BoneCPConfig config = new BoneCPConfig();
 			config.setJdbcUrl(cfg.getProperty(sUrl));
-			config.setUsername(cfg.getProperty(sUser, "sa"));
-			config.setPassword(cfg.getProperty(sPass, ""));
-			config.setMinConnectionsPerPartition(5);
+			config.setUsername(cfg.getProperty(sUser));
+			config.setPassword(cfg.getProperty(sPass));
+/*			config.setMinConnectionsPerPartition(5);
 			config.setMaxConnectionsPerPartition(10);
-			config.setPartitionCount(1);
+			config.setPartitionCount(1);*/
 
 			cpool = new BoneCP(config);
 		} catch (Exception e) {
@@ -145,6 +166,45 @@ public class DatabaseStorage implements Storage {
 		return list;
 	}
 
+	
+	public boolean addNameSpace(int id,String name,String owner,String node_id) {
+		if (id == 0)
+			return false;
+
+		Connection conn = null;
+		try {
+			conn = cpool.getConnection();
+			conn.setTransactionIsolation(Connection.TRANSACTION_REPEATABLE_READ);
+			if (conn != null){
+				System.out.println("Connection successful!");
+				Statement stmt = conn.createStatement();
+				 stmt.executeUpdate("insert into "+sTable_space+" (Name,Owner,ID) values('"+name+"','"+owner+"','"+id+"')"); // do something with the connection.
+				
+			}
+			
+			
+		} catch (Exception ex) {
+			ex.printStackTrace();
+			logger.error("failed/exception on creating space " + name, ex);
+			try {
+				conn.rollback();
+			} catch (SQLException e) {
+			}
+
+			// indicate failure
+			return false;
+		} finally {
+			if (conn != null) {
+				try {
+					conn.close();
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+		}
+
+		return true;
+	}
 	@Override
 	public NameSpace createNameSpace(NameSpace space) {
 		if (space == null)
@@ -154,7 +214,7 @@ public class DatabaseStorage implements Storage {
 		try {
 			conn = cpool.getConnection();
 			conn.setTransactionIsolation(Connection.TRANSACTION_REPEATABLE_READ);
-			// TODO complete code to use JDBC
+	
 		} catch (Exception ex) {
 			ex.printStackTrace();
 			logger.error("failed/exception on creating space " + space, ex);
@@ -185,7 +245,7 @@ public class DatabaseStorage implements Storage {
 	}
 
 	@Override
-	public boolean addDocument(String namespace, String doc) {
+	public boolean addDocument(String namespace, Document doc) {
 		// TODO Auto-generated method stub
 		return false;
 	}
@@ -207,4 +267,5 @@ public class DatabaseStorage implements Storage {
 		// TODO Auto-generated method stub
 		return null;
 	}
+	
 }

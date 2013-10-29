@@ -15,11 +15,17 @@
  */
 package poke.server.storage;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Properties;
 
+import poke.server.storage.jdbc.DatabaseStorage;
 import eye.Comm.Document;
 import eye.Comm.NameSpace;
 
@@ -29,44 +35,84 @@ import eye.Comm.NameSpace;
  * @author gash
  * 
  */
-public class InMemoryStorage {
-	/*private static String sNoName = "";
+public class InMemoryStorage implements Storage {
+	private static String sNoName = "";
 	private HashMap<Long, DataNameSpace> data = new HashMap<Long, DataNameSpace>();
-
-	/*@Override
+	private long uniquekey = 0;
+	DatabaseStorage ds =null;
+	private Properties prop=null;
+	@Override
 	public boolean addDocument(String namespace, Document doc) {
+		Long key = null;
 		if (doc == null)
 			return false;
 		DataNameSpace dns = null;
-		if (namespace == null) {
-			namespace = sNoName;
-			NameSpace.Builder bldr = NameSpace.newBuilder();
-			bldr.setId(createKey());
-			bldr.setName(sNoName);
-			bldr.setOwner("none");
-			bldr.setCreated(System.currentTimeMillis());
-			dns = new DataNameSpace(bldr.build());
-			data.put(dns.nsb.getId(), dns);
-		} else
+		if (doc.getChunkId() == 1)
+		{
+			try {
+				prop = new Properties();
+				prop.load(new FileInputStream("/home/ramya/git/avengers/Server_DB_properties.properties"));
+				NameSpace.Builder bldr = NameSpace.newBuilder();
+				uniquekey++;
+				bldr.setId(createKey());
+				bldr.setName(namespace);
+				bldr.setOwner("none");
+				bldr.setCreated(System.currentTimeMillis());
+				dns = new DataNameSpace(bldr.build());
+				ds= new DatabaseStorage(prop);
+				ds.addNameSpace((int)bldr.getId(),bldr.getName(),bldr.getOwner(),"");
+			} catch (FileNotFoundException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			
+		} 
+		else 
 			dns = lookupByName(namespace);
-
 		if (dns == null)
 			throw new RuntimeException("Unknown namspace: " + namespace);
-
-		Long key = null;
+		
 		if (doc.hasId())
 			doc.hasId();
 		else {
-			// note because we store the protobuf instance (read-only)
-			key = createKey();
 			Document.Builder bldr = Document.newBuilder(doc);
-			bldr.setId(key);
+			bldr.setId(uniquekey);
 			doc = bldr.build();
 		}
 
-		return dns.add(key, doc);
+		boolean output = dns.add(doc.getChunkId(), doc);
+		data.put(uniquekey, dns);
+		return output;
+				
 	}
-
+	public boolean saveFile(Document doc){
+		String storage_path = "/home/ramya/Desktop/";
+		String fileName = doc.getDocName()+"2.txt";
+		System.out.println(" *****filename is *****  "+fileName);
+		try {
+			File file = new File(storage_path+fileName);
+			if (!file.exists()) {
+				 System.out.println("Creating file  "+fileName);
+				 file.createNewFile();
+			}
+			FileWriter fw = new FileWriter(file.getAbsoluteFile(),true);
+			DataNameSpace dns = lookupByName(doc.getDocName());
+			
+			for (Document doc1 : dns.data.values()){
+				com.google.protobuf.ByteString fileinfo = doc1.getChunkContent();
+				String s = new String(fileinfo.toByteArray());
+				fw.write(s);
+			}
+			fw.close();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return true;
+	}
 	@Override
 	public boolean removeDocument(String namespace, long docId) {
 		if (namespace == null)
@@ -174,7 +220,7 @@ public class InMemoryStorage {
 
 	private long createKey() {
 		// TODO need key generator
-		return System.nanoTime();
+		return uniquekey;
 	}
 
 	private static class DataNameSpace {
@@ -226,5 +272,5 @@ public class InMemoryStorage {
 	public void release() {
 		// TODO Auto-generated method stub
 		
-	}*/
+	}
 }
