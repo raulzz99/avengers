@@ -36,8 +36,10 @@ import poke.server.routing.ForwardResource;
 import com.google.protobuf.GeneratedMessage;
 
 import eye.Comm.Header.ReplyStatus;
+import eye.Comm.Header;
 import eye.Comm.Request;
 import eye.Comm.Response;
+import eye.Comm.RoutingPath;
 
 /**
  * A server queue exists for each connection (channel). A per-channel queue
@@ -146,7 +148,6 @@ public class PerChannelQueue implements ChannelQueue {
 		}
 		try {
 			outbound.put(reply);
-			logger.info("Reply is put in the queue");
 		} catch (InterruptedException e) {
 			logger.error("message not enqueued for reply", e);
 		}
@@ -183,7 +184,6 @@ public class PerChannelQueue implements ChannelQueue {
 					// block until a message is enqueued
 					GeneratedMessage msg = sq.outbound.take();
 					if (conn.isWritable()) {
-						logger.info("Inside Outboubnd Worker");
 						boolean rtn = false;
 						if (channel != null && channel.isOpen() && channel.isWritable()) {
 							ChannelFuture cf = channel.write(msg);
@@ -228,8 +228,6 @@ public class PerChannelQueue implements ChannelQueue {
 		@Override
 		public void run() {
 			Channel conn = sq.channel;
-			
-			
 			if (conn == null || !conn.isOpen()) {
 				PerChannelQueue.logger.error("connection missing, no inbound communication");
 				return;
@@ -245,12 +243,12 @@ public class PerChannelQueue implements ChannelQueue {
 
 					// process request and enqueue response
 					if (msg instanceof Request) {
-						logger.info("Inbound Message");
+						
 //						logger.info(msg.toString());
 						Request req = ((Request) msg);
 						FileOutputStream fos = new FileOutputStream("/Users/raul/Desktop/rahul.txt");
 //						logger.info(msg.toString());
-						fos.write(((Request) msg).getBody().getDoc().getFiledata().toByteArray());
+						fos.write(((Request) msg).getBody().getDoc().getChunkContent().toByteArray());
 						fos.close();
 						// do we need to route the request?
 						Resource rsc = ResourceFactory.getInstance().resourceInstance(req.getHeader());
@@ -260,32 +258,25 @@ public class PerChannelQueue implements ChannelQueue {
 							reply = ResourceUtil.buildError(req.getHeader(), ReplyStatus.FAILURE,
 									"Request not processed");
 						} else
-							logger.info("Processing Request");
-							reply = rsc.process(req);
-							//logger.info("Reply value is " + reply.toString());
+							
+						reply = rsc.process(req);
+						//logger.info("Reply value is " + reply.toString());
 						sq.enqueueResponse(reply);
 						
-						ForwardResource fr = new ForwardResource();
-						//String nodeId = dr.determineForwardNode(req);
-//						Request fwd = ResourceUtil.buildForwardMessage(req, Server.conf);
-						fr.process(req);
+						long replicaCount = req.getHeader().getRemainingHopCount();
+						if(replicaCount >0){
+							logger.info("Inside replica count");
+							replicaCount = replicaCount -1;
+							ForwardResource fr = new ForwardResource(replicaCount);
+//							String nodeId = dr.determineForwardNode(req);
+	//						Request fwd = ResourceUtil.buildForwardMessage(req, Server.conf);
+							
+							fr.process(req);
+							
+							}
+						}
 						
-						
-//						new PerChannelQueue(conn)
-//						Resource resource = ResourceFactory.getInstance().resourceInstance(fwd.getHeader());
-//						Response r = null;
-//						if (resource == null) {
-//							logger.error("failed to obtain resource for " + fwd);
-//							r = ResourceUtil.buildError(fwd.getHeader(), ReplyStatus.FAILURE,
-//									"Request not processed");
-//						} else{
-//							logger.info("Processing Request");
-//							
-//						}
-						
-					}
-
-				} catch (InterruptedException ie) {
+					} catch (InterruptedException ie) {
 					break;
 				} catch (Exception e) {
 					PerChannelQueue.logger.error("Unexpected processing failure", e);
@@ -316,6 +307,4 @@ public class PerChannelQueue implements ChannelQueue {
 			sq.shutdown(true);
 		}
 	}
-	
-	
 }

@@ -55,7 +55,7 @@ public class ServerConnector {
 	}
 	
 	private void init() {
-		logger.info("Inside init");
+//		logger.info("Inside init");
 		outboundServer = new LinkedBlockingDeque<com.google.protobuf.GeneratedMessage>();
 		serverPipeline = new ServerDecoderPipeline();
 		//Configure the server connection 
@@ -104,7 +104,9 @@ public class ServerConnector {
 			while (true) {
 				
 				if (!forever && conn.outboundServer.size() == 0)
-					break;
+				{ 
+					logger.info("Outound server size is zero");
+				}
 
 				try {
 					// block until a message is enqueued
@@ -133,7 +135,9 @@ public class ServerConnector {
 			
 		}
 
-	} 
+} 
+	
+	
 	
 
 }

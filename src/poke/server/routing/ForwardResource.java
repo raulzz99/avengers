@@ -15,6 +15,7 @@
  */
 package poke.server.routing;
 
+import java.util.Iterator;
 import java.util.List;
 
 import org.slf4j.Logger;
@@ -49,6 +50,11 @@ public class ForwardResource implements Resource  {
 
 	private ServerConf cfg = Server.conf;
 //	private ServerConf cfg;
+	private long HOPCOUNT;
+	
+	public ForwardResource(long hopCount) {
+		HOPCOUNT = hopCount;
+	}
 	
 	public ServerConf getCfg() {
 		return cfg;
@@ -68,22 +74,29 @@ public class ForwardResource implements Resource  {
 	@Override
 	public Response process(Request request) {
 		
-		String nextNode = determineForwardNode(request);
-		logger.info("Value returned by forward Node" + nextNode);
-		if (nextNode != null) {
-			logger.info("Next node is not null");
-			Request fwd = ResourceUtil.buildForwardMessage(request, cfg);
-			logger.info("FORWARDED STRING " + fwd.toString());
-			// TODO forward the request
-			NodeDesc nodeDesc = cfg.getNearest().getNearestNodes().get(nextNode);
-			logger.info("HOST "+ nodeDesc.getHost() + " PORT " + nodeDesc.getPort());
-			ServerConnector serve = new ServerConnector(nodeDesc.getHost(),nodeDesc.getPort());
-			logger.info("SERVER CONNECTOR VALUE is " + serve);
-			try {
-				serve.getOutboundServer().put(fwd);
-			} catch (InterruptedException e) {
+			String nextNode = determineForwardNode(request);
+			Request fwd;
+			logger.info("Value returned by forward Node" + nextNode);
+			if (nextNode != null) {
+			Iterator configIt = cfg.getNearest().getNearestNodes().values().iterator();
+			while(configIt.hasNext()){
+				NodeDesc node = (NodeDesc) configIt.next();
+				fwd = ResourceUtil.buildForwardMessage(request, node,HOPCOUNT );
+				if(fwd == null){
+					continue;
+				}
+				logger.info(" FORWARDED STRING " + fwd.toString());
+				NodeDesc nodeDesc = cfg.getNearest().getNearestNodes().get(nextNode);
+				logger.info("HOST "+ nodeDesc.getHost() + " PORT " + nodeDesc.getPort());
+				ServerConnector serve = new ServerConnector(nodeDesc.getHost(),nodeDesc.getPort());
+				logger.info("SERVER CONNECTOR VALUE is " + serve);
+				try {
+					serve.getOutboundServer().put(fwd);
+				} catch (InterruptedException e) {
+					
+					e.printStackTrace();
+				}
 				
-				e.printStackTrace();
 			}
 			return null;
 		} else {
@@ -123,15 +136,14 @@ public class ForwardResource implements Resource  {
 		List<RoutingPath> paths = request.getHeader().getPathList();
 		
 		if (paths == null || paths.size() == 0) {
-			// pick first nearest
-			//Testing
-			//logger.info(this.getCfg().toString());
 			logger.info("Server conf " + cfg);
 			NodeDesc nd = cfg.getNearest().getNearestNodes().values().iterator().next();
+			
 			logger.info("Returned Value " + nd.getNodeId());
 			return nd.getNodeId();
 		} else {
 			logger.info("Inside else block");
+			logger.info("PATHS " + paths.iterator().next().getNode());
 			// if this server has already seen this message return null
 			for (RoutingPath rp : paths) {
 				for (NodeDesc nd : cfg.getNearest().getNearestNodes().values()) {

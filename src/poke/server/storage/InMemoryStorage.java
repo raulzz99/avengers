@@ -32,41 +32,43 @@ import eye.Comm.NameSpace;
 public class InMemoryStorage implements Storage {
 	private static String sNoName = "";
 	private HashMap<Long, DataNameSpace> data = new HashMap<Long, DataNameSpace>();
-
+	private long uniquekey = 0;
+	
 	@Override
 	public boolean addDocument(String namespace, Document doc) {
-		if (doc == null)
-			return false;
-		DataNameSpace dns = null;
-		if (namespace == null) {
-			namespace = sNoName;
-			NameSpace.Builder bldr = NameSpace.newBuilder();
-			bldr.setId(createKey());
-			bldr.setName(sNoName);
-			bldr.setOwner("none");
-			bldr.setCreated(System.currentTimeMillis());
-			dns = new DataNameSpace(bldr.build());
-			data.put(dns.nsb.getId(), dns);
-		} else
-			dns = lookupByName(namespace);
-
-		if (dns == null)
-			throw new RuntimeException("Unknown namspace: " + namespace);
-
-		Long key = null;
-		if (doc.hasId())
-			doc.hasId();
-		else {
-			// note because we store the protobuf instance (read-only)
-			key = createKey();
-			Document.Builder bldr = Document.newBuilder(doc);
-			bldr.setId(key);
-			doc = bldr.build();
-		}
-
-		return dns.add(key, doc);
-	}
-
+		    Long key = null;
+		      if (doc == null)
+		        return false;
+		      DataNameSpace dns = null;
+		     if (doc.getChunkId() == 1)
+		     {
+		        NameSpace.Builder bldr = NameSpace.newBuilder();
+		        uniquekey++;
+		        bldr.setId(createKey());
+		        bldr.setName(namespace);
+		        bldr.setOwner("none");
+		        bldr.setCreated(System.currentTimeMillis());
+		        dns = new DataNameSpace(bldr.build());
+		 
+		      } 
+		     else 
+		        dns = lookupByName(namespace);
+		      if (dns == null)
+		        throw new RuntimeException("Unknown namspace: " + namespace);
+		      if (doc.hasId())
+		        doc.hasId();
+		      else {
+		        Document.Builder bldr = Document.newBuilder(doc);
+		       bldr.setId(uniquekey);
+		        doc = bldr.build();
+		      }
+		  
+		     boolean output = dns.add(doc.getChunkId(), doc);
+		     data.put(uniquekey, dns);
+		     return output;
+		         
+		    }
+		  
 	@Override
 	public boolean removeDocument(String namespace, long docId) {
 		if (namespace == null)
@@ -174,7 +176,7 @@ public class InMemoryStorage implements Storage {
 
 	private long createKey() {
 		// TODO need key generator
-		return System.nanoTime();
+		return uniquekey;
 	}
 
 	private static class DataNameSpace {

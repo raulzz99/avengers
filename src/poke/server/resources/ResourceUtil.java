@@ -15,6 +15,8 @@
  */
 package poke.server.resources;
 
+import java.util.Collection;
+import java.util.Iterator;
 import java.util.List;
 
 import org.slf4j.Logger;
@@ -44,24 +46,106 @@ public class ResourceUtil {
 	 *            The server's configuration
 	 * @return The request with this server added to the routing path or null
 	 */
-	public static Request buildForwardMessage(Request req, ServerConf cfg) {
-		NodeDesc node = cfg.getNearest().getNearestNodes().values().iterator().next();
-		String iam = node.getNodeId();
+	public static Request buildForwardMessage(Request req, NodeDesc node, long count) {
+		
+//		NodeDesc node = cfg.getNearest().getNearestNodes().values().iterator().next();
+//        Iterator it = cfg.getNearest().getNearestNodes().values().iterator();
+//        while(it.hasNext()){
+//        	NodeDesc node = (NodeDesc) it.next();
+//        	String iam = node.getNodeId();
+//        	logger.info("vaue of iam is " +  iam);
+//        	List<RoutingPath> paths = req.getHeader().getPathList();
+//        	logger.info("Size of paths " +  paths.size());
+//        	if (paths != null) {
+//        	
+//        }
+		
 		//String iam = cfg.getServer().getProperty("node.id");
-		logger.info("vaue of iam is " +  iam);
-		List<RoutingPath> paths = req.getHeader().getPathList();
-		logger.info("Size of paths " +  paths.size());
-		if (paths != null) {
-			// if this server has already seen this message return null
-			for (RoutingPath rp : paths) {
-				logger.info("NODE IS " + rp.getNode());
-				if (iam.equalsIgnoreCase(rp.getNode()))
-					return null;
-			}
-		}
+        
+        
+//        List<RoutingPath> paths = req.getHeader().getPathList();
+        
+        
+            // if this server has already seen this message return null
+            
+//        }
+		
+       
+		
+		
+//		//NodeDesc node = cfg.getNearest().getNearestNodes().values().iterator().next();
+//		Collection<NodeDesc> node =  cfg.getNearest().getNearestNodes().values();
+//		Iterator it = node.iterator();
+//		String iam=null;
+//		node.size();
+//		//NodeDesc[] desc = (NodeDesc[]) node.toArray(); 
+//		int i = 0;
+//		while(it.hasNext()){
+//			//iam = desc.
+//			logger.info("Value of iam " + iam);
+//			List<RoutingPath> paths = req.getHeader().getPathList();
+//			logger.info("Size of paths " + paths.size());
+//			if(paths!=null){
+//				for(RoutingPath rp : paths){
+//					if(iam.equalsIgnoreCase(rp.getNode())){
+//						//i++;
+//						continue;
+//						}
+//					else{
+//						break;
+//					}	
+//						// Continue statement goes here
+//				}
+//				
+//					
+//				}
+//				else{
+//				break;
+//			}
+//		}
+			
+		
+//		for(NodeDesc nd : node){
+//			iam = nd.getNodeId();
+//			logger.info("vaue of iam is " +  iam);
+//			List<RoutingPath> paths = req.getHeader().getPathList();
+//			logger.info("Size of paths " +  paths.size());
+//			if (paths != null) {
+//				// if this server has already seen this message return null
+//				for (RoutingPath rp : paths) {
+//					logger.info("NODE IS " + rp.getNode());
+//					if (iam.equalsIgnoreCase(rp.getNode()))
+//						return null;
+//				}
+//			}
+//			else{
+//				break;
+//			}
+//		
+//		}
+		
+		//String iam = cfg.getServer().getProperty("node.id");
+		//logger.info("vaue of iam is " +  iam);
+		
+//	NodeDesc node = cfg.getNearest().getNearestNodes().values().iterator().next();
+    String iam = node.getNodeId();
+    //String iam = cfg.getServer().getProperty("node.id");
+    logger.info("vaue of iam is " +  iam);
+    List<RoutingPath> paths = req.getHeader().getPathList();
+    logger.info("Size of paths " +  paths.size());
+    if (paths != null) {
+        // if this server has already seen this message return null
+        for (RoutingPath rp : paths) {
+            logger.info("NODE IS " + rp.getNode());
+            if (iam.equalsIgnoreCase(rp.getNode()))
+                return null;
+        }
+    }
+		
 		
 		Request.Builder bldr = Request.newBuilder(req);
 		Header.Builder hbldr = bldr.getHeaderBuilder();
+		hbldr.setRemainingHopCount(count);
 		RoutingPath.Builder rpb = RoutingPath.newBuilder();
 		rpb.setNode(iam);
 		rpb.setTime(System.currentTimeMillis());

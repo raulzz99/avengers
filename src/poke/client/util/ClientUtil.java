@@ -18,7 +18,7 @@ public class ClientUtil {
 		}
 		
 			
-			com.google.protobuf.ByteString fileinfo = doc.getFiledata();
+			com.google.protobuf.ByteString fileinfo = doc.getChunkContent();
 			String s = new String(fileinfo.toByteArray());
 			System.out.println(s);
 		
