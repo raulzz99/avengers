@@ -15,6 +15,7 @@
  */
 package poke.server.queue;
 
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.RandomAccessFile;
 import java.lang.Thread.State;
@@ -32,6 +33,7 @@ import poke.server.resources.Resource;
 import poke.server.resources.ResourceFactory;
 import poke.server.resources.ResourceUtil;
 import poke.server.routing.ForwardResource;
+import poke.server.storage.InMemoryStorage;
 
 import com.google.protobuf.GeneratedMessage;
 
@@ -54,7 +56,7 @@ import eye.Comm.RoutingPath;
  */
 public class PerChannelQueue implements ChannelQueue {
 	protected static Logger logger = LoggerFactory.getLogger("server");
-
+	private  InMemoryStorage docStorer = new InMemoryStorage();
 	private Channel channel;
 	private LinkedBlockingDeque<com.google.protobuf.GeneratedMessage> inbound;
 	private LinkedBlockingDeque<com.google.protobuf.GeneratedMessage> outbound;
@@ -228,6 +230,7 @@ public class PerChannelQueue implements ChannelQueue {
 		@Override
 		public void run() {
 			Channel conn = sq.channel;
+			logger.info("Server side---- Inbound worker run method " );
 			if (conn == null || !conn.isOpen()) {
 				PerChannelQueue.logger.error("connection missing, no inbound communication");
 				return;
@@ -240,41 +243,46 @@ public class PerChannelQueue implements ChannelQueue {
 				try {
 					// block until a message is enqueued
 					GeneratedMessage msg = sq.inbound.take();
-
 					// process request and enqueue response
 					if (msg instanceof Request) {
-						
-//						logger.info(msg.toString());
 						Request req = ((Request) msg);
-						FileOutputStream fos = new FileOutputStream("/Users/raul/Desktop/rahul.txt");
-//						logger.info(msg.toString());
-						fos.write(((Request) msg).getBody().getDoc().getChunkContent().toByteArray());
-						fos.close();
-						// do we need to route the request?
 						Resource rsc = ResourceFactory.getInstance().resourceInstance(req.getHeader());
+						// do we need to route the request?
 						Response reply = null;
 						if (rsc == null) {
 							logger.error("failed to obtain resource for " + req);
 							reply = ResourceUtil.buildError(req.getHeader(), ReplyStatus.FAILURE,
 									"Request not processed");
-						} else
-							
-						reply = rsc.process(req);
-						//logger.info("Reply value is " + reply.toString());
-						sq.enqueueResponse(reply);
-						
-						long replicaCount = req.getHeader().getRemainingHopCount();
-						if(replicaCount >0){
-							logger.info("Inside replica count");
-							replicaCount = replicaCount -1;
-							ForwardResource fr = new ForwardResource(replicaCount);
-//							String nodeId = dr.determineForwardNode(req);
-	//						Request fwd = ResourceUtil.buildForwardMessage(req, Server.conf);
-							
-							fr.process(req);
-							
-							}
 						}
+						if (req.getHeader().getRoutingId() == Header.Routing.DOCADD) {
+							docStorer.addDocument(req.getBody().getSpace().getName(),req.getBody().getDoc());
+							long replicaCount = req.getHeader().getRemainingHopCount();
+							if(replicaCount > 0){
+								replicaCount = replicaCount -1;
+								ForwardResource fr = new ForwardResource(replicaCount);
+								fr.process(req);
+								}
+
+							
+							if((req.getBody().getDoc().getChunkId()) == (req.getBody().getDoc().getTotalChunk())){
+								docStorer.saveFile(req.getBody().getDoc(),req.getBody().getSpace());
+								reply = rsc.process(req);
+								//logger.info("Reply value is " + reply.toString());
+								sq.enqueueResponse(reply);
+							}
+//							long replicaCount = req.getHeader().getRemainingHopCount();
+//							logger.info("Value of replica count is " + replicaCount);
+//							
+//							if(replicaCount >0){
+//								logger.info("Inside replica count");
+//								replicaCount = replicaCount -1;
+//								ForwardResource fr = new ForwardResource(replicaCount);
+//								logger.info("INSIDE REPLICA COUNT " + req.toString());
+//								fr.process(req);
+//								
+//								}
+						}
+					}
 						
 					} catch (InterruptedException ie) {
 					break;
@@ -282,6 +290,7 @@ public class PerChannelQueue implements ChannelQueue {
 					PerChannelQueue.logger.error("Unexpected processing failure", e);
 					break;
 				}
+				
 			}
 
 			if (!forever) {

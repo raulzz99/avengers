@@ -15,10 +15,16 @@
  */
 package poke.server.storage;
 
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Properties;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import eye.Comm.Document;
 import eye.Comm.NameSpace;
@@ -30,6 +36,7 @@ import eye.Comm.NameSpace;
  * 
  */
 public class InMemoryStorage implements Storage {
+	protected static Logger logger = LoggerFactory.getLogger("server");
 	private static String sNoName = "";
 	private HashMap<Long, DataNameSpace> data = new HashMap<Long, DataNameSpace>();
 	private long uniquekey = 0;
@@ -40,8 +47,9 @@ public class InMemoryStorage implements Storage {
 		      if (doc == null)
 		        return false;
 		      DataNameSpace dns = null;
-		     if (doc.getChunkId() == 1)
+		     if (doc.getChunkId() == 0)
 		     {
+		    	 logger.info("CHUNK ID is zero");
 		        NameSpace.Builder bldr = NameSpace.newBuilder();
 		        uniquekey++;
 		        bldr.setId(createKey());
@@ -49,7 +57,7 @@ public class InMemoryStorage implements Storage {
 		        bldr.setOwner("none");
 		        bldr.setCreated(System.currentTimeMillis());
 		        dns = new DataNameSpace(bldr.build());
-		 
+		        logger.info("DNS value is " + dns.data.size());
 		      } 
 		     else 
 		        dns = lookupByName(namespace);
@@ -68,7 +76,44 @@ public class InMemoryStorage implements Storage {
 		     return output;
 		         
 		    }
+	
+	public boolean saveFile(Document doc , NameSpace space){
+        String storage_path = createPath(space.getOwner());
+        
+          String fileName = doc.getDocName();
+//        logger.info("DOCUMENT NAME IS " + doc.getDocName());
+        try {
+                File file = new File(storage_path+File.separator+doc.getDocName());
+                if (!file.exists()) {
+                         System.out.println("Creating file  "+fileName);
+                         file.createNewFile();
+                }
+                FileWriter fw = new FileWriter(file.getAbsoluteFile(),true);
+                DataNameSpace dns = lookupByName(doc.getDocName());
+                for (Document doc1 : dns.data.values()){
+                        com.google.protobuf.ByteString fileinfo = doc1.getChunkContent();
+                        String s = new String(fileinfo.toByteArray());
+                        fw.write(s);
+                }
+                fw.close();
+        } catch (IOException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+        }
+        return true;
+}
+	
 		  
+	private String createPath(String owner) {
+		String tempDir = System.getProperty("java.io.tmpdir");
+		if(owner==null){
+			owner = "defaultDir";
+		}
+		File f = new File(tempDir+File.separator+owner);
+		f.mkdir();
+		return f.getAbsolutePath();
+	}
+
 	@Override
 	public boolean removeDocument(String namespace, long docId) {
 		if (namespace == null)

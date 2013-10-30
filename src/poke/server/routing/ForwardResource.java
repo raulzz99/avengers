@@ -56,6 +56,7 @@ public class ForwardResource implements Resource  {
 		HOPCOUNT = hopCount;
 	}
 	
+	
 	public ServerConf getCfg() {
 		return cfg;
 	}
@@ -73,7 +74,7 @@ public class ForwardResource implements Resource  {
 
 	@Override
 	public Response process(Request request) {
-		
+			ServerConnector serve=null;
 			String nextNode = determineForwardNode(request);
 			Request fwd;
 			logger.info("Value returned by forward Node" + nextNode);
@@ -88,7 +89,11 @@ public class ForwardResource implements Resource  {
 				logger.info(" FORWARDED STRING " + fwd.toString());
 				NodeDesc nodeDesc = cfg.getNearest().getNearestNodes().get(nextNode);
 				logger.info("HOST "+ nodeDesc.getHost() + " PORT " + nodeDesc.getPort());
-				ServerConnector serve = new ServerConnector(nodeDesc.getHost(),nodeDesc.getPort());
+				//ServerConnector serve = new ServerConnector(nodeDesc.getHost(),nodeDesc.getPort());
+				if(serve==null){
+					logger.info("Serve is null");
+					serve = new ServerConnector(nodeDesc.getHost(),nodeDesc.getPort());
+				}
 				logger.info("SERVER CONNECTOR VALUE is " + serve);
 				try {
 					serve.getOutboundServer().put(fwd);

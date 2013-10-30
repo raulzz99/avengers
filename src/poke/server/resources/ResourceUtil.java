@@ -47,83 +47,6 @@ public class ResourceUtil {
 	 * @return The request with this server added to the routing path or null
 	 */
 	public static Request buildForwardMessage(Request req, NodeDesc node, long count) {
-		
-//		NodeDesc node = cfg.getNearest().getNearestNodes().values().iterator().next();
-//        Iterator it = cfg.getNearest().getNearestNodes().values().iterator();
-//        while(it.hasNext()){
-//        	NodeDesc node = (NodeDesc) it.next();
-//        	String iam = node.getNodeId();
-//        	logger.info("vaue of iam is " +  iam);
-//        	List<RoutingPath> paths = req.getHeader().getPathList();
-//        	logger.info("Size of paths " +  paths.size());
-//        	if (paths != null) {
-//        	
-//        }
-		
-		//String iam = cfg.getServer().getProperty("node.id");
-        
-        
-//        List<RoutingPath> paths = req.getHeader().getPathList();
-        
-        
-            // if this server has already seen this message return null
-            
-//        }
-		
-       
-		
-		
-//		//NodeDesc node = cfg.getNearest().getNearestNodes().values().iterator().next();
-//		Collection<NodeDesc> node =  cfg.getNearest().getNearestNodes().values();
-//		Iterator it = node.iterator();
-//		String iam=null;
-//		node.size();
-//		//NodeDesc[] desc = (NodeDesc[]) node.toArray(); 
-//		int i = 0;
-//		while(it.hasNext()){
-//			//iam = desc.
-//			logger.info("Value of iam " + iam);
-//			List<RoutingPath> paths = req.getHeader().getPathList();
-//			logger.info("Size of paths " + paths.size());
-//			if(paths!=null){
-//				for(RoutingPath rp : paths){
-//					if(iam.equalsIgnoreCase(rp.getNode())){
-//						//i++;
-//						continue;
-//						}
-//					else{
-//						break;
-//					}	
-//						// Continue statement goes here
-//				}
-//				
-//					
-//				}
-//				else{
-//				break;
-//			}
-//		}
-			
-		
-//		for(NodeDesc nd : node){
-//			iam = nd.getNodeId();
-//			logger.info("vaue of iam is " +  iam);
-//			List<RoutingPath> paths = req.getHeader().getPathList();
-//			logger.info("Size of paths " +  paths.size());
-//			if (paths != null) {
-//				// if this server has already seen this message return null
-//				for (RoutingPath rp : paths) {
-//					logger.info("NODE IS " + rp.getNode());
-//					if (iam.equalsIgnoreCase(rp.getNode()))
-//						return null;
-//				}
-//			}
-//			else{
-//				break;
-//			}
-//		
-//		}
-		
 		//String iam = cfg.getServer().getProperty("node.id");
 		//logger.info("vaue of iam is " +  iam);
 		
@@ -141,12 +64,14 @@ public class ResourceUtil {
                 return null;
         }
     }
-		
-		
 		Request.Builder bldr = Request.newBuilder(req);
 		Header.Builder hbldr = bldr.getHeaderBuilder();
 		hbldr.setRemainingHopCount(count);
 		RoutingPath.Builder rpb = RoutingPath.newBuilder();
+//		NameSpace.Builder ns = NameSpace.newBuilder();
+//		ns.setName(req.getBody().getSpace().getName());
+//		ns.setOwner(req.getBody().getSpace().getOwner());
+//		
 		rpb.setNode(iam);
 		rpb.setTime(System.currentTimeMillis());
 		hbldr.addPath(rpb.build());
@@ -154,7 +79,37 @@ public class ResourceUtil {
 		return bldr.build();
 	}
 
-		
+//	//Namespace builder
+//	ns = eye.Comm.NameSpace.newBuilder();
+//	ns.setName("temp");
+//	ns.setOwner(owner);
+//	// data to send
+//	f = eye.Comm.Document.newBuilder();
+//	f.setDocName("temp");
+//	f.setChunkContent(fileinfo);
+//	f.setChunkId(i);
+//	f.setTotalChunk(TOTAL_CHUNK);
+//	// payload containing data
+//	p = eye.Comm.Payload.newBuilder();
+//	r = eye.Comm.Request.newBuilder();
+//	p.setDoc(f.build());
+//	p.setSpace(ns.build());
+//	r.setBody(p.build());
+//	
+//	// header with routing info
+//	h = Header.newBuilder();
+//	h.setOriginator("client");
+//	h.setTime(System.currentTimeMillis());
+//	h.setRoutingId(eye.Comm.Header.Routing.DOCADD);
+//	h.setRemainingHopCount(3);
+//	
+//	r.setHeader(h.build());
+//
+//	req = r.build();
+	
+	
+	
+	
 	/**
 	 * build the response header from a request
 	 * 
