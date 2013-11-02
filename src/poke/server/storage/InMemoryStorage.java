@@ -40,6 +40,7 @@ public class InMemoryStorage implements Storage {
 	private static String sNoName = "";
 	private HashMap<Long, DataNameSpace> data = new HashMap<Long, DataNameSpace>();
 	private long uniquekey = 0;
+	private static int i = 0;
 	
 	@Override
 	public boolean addDocument(String namespace, Document doc) {
@@ -49,7 +50,6 @@ public class InMemoryStorage implements Storage {
 		      DataNameSpace dns = null;
 		     if (doc.getChunkId() == 0)
 		     {
-		    	 logger.info("CHUNK ID is zero");
 		        NameSpace.Builder bldr = NameSpace.newBuilder();
 		        uniquekey++;
 		        bldr.setId(createKey());
@@ -57,8 +57,7 @@ public class InMemoryStorage implements Storage {
 		        bldr.setOwner("none");
 		        bldr.setCreated(System.currentTimeMillis());
 		        dns = new DataNameSpace(bldr.build());
-		        logger.info("DNS value is " + dns.data.size());
-		      } 
+		     } 
 		     else 
 		        dns = lookupByName(namespace);
 		      if (dns == null)
@@ -77,29 +76,37 @@ public class InMemoryStorage implements Storage {
 		         
 		    }
 	
-	public boolean saveFile(Document doc , NameSpace space){
-        String storage_path = createPath(space.getOwner());
-        
-          String fileName = doc.getDocName();
-//        logger.info("DOCUMENT NAME IS " + doc.getDocName());
+		public boolean saveFile(Document doc , NameSpace space , String fileName){
+			String storage_path = createPath(space.getOwner());
+//			String fileName = doc.getDocName();
+			
+			logger.info("DOCUMENT NAME IS " + fileName + "SIZE IS "+ doc.getDocSize() + "TOTAL CHUNK " + doc.getTotalChunk());
         try {
-                File file = new File(storage_path+File.separator+doc.getDocName());
-                if (!file.exists()) {
+        	
+                File file = new File(storage_path+File.separator+fileName);
+               logger.info("Inside save file " + storage_path+File.separator+fileName);
+               logger.info("File Name is " + fileName); 
+               if (!file.exists()) {
+                	
                          System.out.println("Creating file  "+fileName);
                          file.createNewFile();
                 }
-                FileWriter fw = new FileWriter(file.getAbsoluteFile(),true);
+                FileWriter fw = new FileWriter(file);
                 DataNameSpace dns = lookupByName(doc.getDocName());
                 for (Document doc1 : dns.data.values()){
                         com.google.protobuf.ByteString fileinfo = doc1.getChunkContent();
                         String s = new String(fileinfo.toByteArray());
+                        logger.info(s);
                         fw.write(s);
                 }
+                
                 fw.close();
+                
         } catch (IOException e) {
                 // TODO Auto-generated catch block
                 e.printStackTrace();
         }
+        
         return true;
 }
 	
@@ -214,6 +221,7 @@ public class InMemoryStorage implements Storage {
 
 		for (DataNameSpace dns : data.values()) {
 			if (dns.getNameSpace().getName().equals(name))
+				logger.info("DNS NAME IS "  + dns.getNameSpace().getName());
 				return dns;
 		}
 		return null;

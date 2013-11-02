@@ -31,7 +31,11 @@ public class ServerConnector {
 	private ServerDecoderPipeline serverPipeline;
 	private OutboundWorker worker;
 	protected static AtomicReference<ServerConnector> instance = new AtomicReference<ServerConnector>();
-
+	private static ServerConnector server;
+	
+//		public static ServerConnector getInstance(String host , int port){
+//			return new ServerConnector(host, port);
+//		}
 	
 	public LinkedBlockingDeque<com.google.protobuf.GeneratedMessage> getOutboundServer() {
 		return outboundServer;
@@ -44,10 +48,11 @@ public class ServerConnector {
 
 	
 	
-//	public static ServerConnector getInstance(){
-//		instance.compareAndSet(null, new ServerConnector());
-//		return instance.get();
-//	}
+	public static ServerConnector getInstance(String host , int port){
+		instance.compareAndSet(null, new ServerConnector(host,port));
+		return instance.get();
+	}
+	
 	public ServerConnector(String host , int port){
 		this.host = host;
 		this.port = port;
@@ -87,12 +92,14 @@ public class ServerConnector {
 	protected class OutboundWorker extends Thread{
 		ServerConnector conn;
 		boolean forever = true;
+		
 		public OutboundWorker(ServerConnector conn) {
 			this.conn = conn;
 
 			if (conn.outboundServer == null)
 				throw new RuntimeException("connection worker detected null queue");
 		}
+		
 		@Override
 		public void run(){
 			Channel ch = conn.connect();

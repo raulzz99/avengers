@@ -46,13 +46,10 @@ public class ResourceUtil {
 	 *            The server's configuration
 	 * @return The request with this server added to the routing path or null
 	 */
-	public static Request buildForwardMessage(Request req, NodeDesc node, long count) {
-		//String iam = cfg.getServer().getProperty("node.id");
-		//logger.info("vaue of iam is " +  iam);
+	public static Request buildForwardMessage(Request req, ServerConf cfg,long count) {
 		
 //	NodeDesc node = cfg.getNearest().getNearestNodes().values().iterator().next();
-    String iam = node.getNodeId();
-    //String iam = cfg.getServer().getProperty("node.id");
+    String iam = cfg.getServer().getProperty("node.id");
     logger.info("vaue of iam is " +  iam);
     List<RoutingPath> paths = req.getHeader().getPathList();
     logger.info("Size of paths " +  paths.size());
@@ -68,10 +65,6 @@ public class ResourceUtil {
 		Header.Builder hbldr = bldr.getHeaderBuilder();
 		hbldr.setRemainingHopCount(count);
 		RoutingPath.Builder rpb = RoutingPath.newBuilder();
-//		NameSpace.Builder ns = NameSpace.newBuilder();
-//		ns.setName(req.getBody().getSpace().getName());
-//		ns.setOwner(req.getBody().getSpace().getOwner());
-//		
 		rpb.setNode(iam);
 		rpb.setTime(System.currentTimeMillis());
 		hbldr.addPath(rpb.build());
@@ -79,36 +72,7 @@ public class ResourceUtil {
 		return bldr.build();
 	}
 
-//	//Namespace builder
-//	ns = eye.Comm.NameSpace.newBuilder();
-//	ns.setName("temp");
-//	ns.setOwner(owner);
-//	// data to send
-//	f = eye.Comm.Document.newBuilder();
-//	f.setDocName("temp");
-//	f.setChunkContent(fileinfo);
-//	f.setChunkId(i);
-//	f.setTotalChunk(TOTAL_CHUNK);
-//	// payload containing data
-//	p = eye.Comm.Payload.newBuilder();
-//	r = eye.Comm.Request.newBuilder();
-//	p.setDoc(f.build());
-//	p.setSpace(ns.build());
-//	r.setBody(p.build());
-//	
-//	// header with routing info
-//	h = Header.newBuilder();
-//	h.setOriginator("client");
-//	h.setTime(System.currentTimeMillis());
-//	h.setRoutingId(eye.Comm.Header.Routing.DOCADD);
-//	h.setRemainingHopCount(3);
-//	
-//	r.setHeader(h.build());
-//
-//	req = r.build();
-	
-	
-	
+
 	
 	/**
 	 * build the response header from a request
@@ -126,7 +90,7 @@ public class ResourceUtil {
 		Header.Builder bldr = Header.newBuilder();
 		bldr.setOriginator(from);
 		bldr.setRoutingId(path);
-		bldr.setTag(tag);
+		bldr.setTag("response");
 		bldr.setReplyCode(status);
 
 		if (msg != null)

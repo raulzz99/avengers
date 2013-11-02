@@ -254,34 +254,34 @@ public class PerChannelQueue implements ChannelQueue {
 							reply = ResourceUtil.buildError(req.getHeader(), ReplyStatus.FAILURE,
 									"Request not processed");
 						}
+						if (! req.getHeader().getTag().equals("response") ) {
+							
 						if (req.getHeader().getRoutingId() == Header.Routing.DOCADD) {
 							docStorer.addDocument(req.getBody().getSpace().getName(),req.getBody().getDoc());
 							long replicaCount = req.getHeader().getRemainingHopCount();
 							if(replicaCount > 0){
-								replicaCount = replicaCount -1;
+								logger.info("Insie replica count " + req.getBody().getSpace().getName());
+								replicaCount = replicaCount -1;		
 								ForwardResource fr = new ForwardResource(replicaCount);
 								fr.process(req);
 								}
-
-							
-							if((req.getBody().getDoc().getChunkId()) == (req.getBody().getDoc().getTotalChunk())){
-								docStorer.saveFile(req.getBody().getDoc(),req.getBody().getSpace());
-								reply = rsc.process(req);
-								//logger.info("Reply value is " + reply.toString());
-								sq.enqueueResponse(reply);
-							}
-//							long replicaCount = req.getHeader().getRemainingHopCount();
-//							logger.info("Value of replica count is " + replicaCount);
-//							
-//							if(replicaCount >0){
-//								logger.info("Inside replica count");
-//								replicaCount = replicaCount -1;
-//								ForwardResource fr = new ForwardResource(replicaCount);
-//								logger.info("INSIDE REPLICA COUNT " + req.toString());
-//								fr.process(req);
-//								
-//								}
 						}
+					}
+							logger.info("header tag: "+req.getHeader().getTag());
+							if (! req.getHeader().getTag().equals("response") ) {
+								if((req.getBody().getDoc().getChunkId()) == (req.getBody().getDoc().getTotalChunk())){
+									logger.info("CBefore Save file is called " +req.getBody().getDoc().getDocName());
+									logger.info("CHUNK ID IS " + req.getBody().getDoc().getChunkId() );
+									docStorer.saveFile(req.getBody().getDoc(), req.getBody().getSpace(), req.getBody().getDoc().getDocName());
+									reply = rsc.process(req);
+									//logger.info("Reply value is " + reply.toString());
+									sq.enqueueResponse(reply);
+								}
+							} else {
+								//todo handle response
+							}
+//							
+//						}
 					}
 						
 					} catch (InterruptedException ie) {

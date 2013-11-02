@@ -47,10 +47,10 @@ import eye.Comm.RoutingPath;
  */
 public class ForwardResource implements Resource  {
 	protected static Logger logger = LoggerFactory.getLogger("server");
-
 	private ServerConf cfg = Server.conf;
 //	private ServerConf cfg;
 	private long HOPCOUNT;
+	private static ServerConnector serve=null;
 	
 	public ForwardResource(long hopCount) {
 		HOPCOUNT = hopCount;
@@ -74,27 +74,21 @@ public class ForwardResource implements Resource  {
 
 	@Override
 	public Response process(Request request) {
-			ServerConnector serve=null;
+			int count =0;
+//			ServerConnector serve=null;
 			String nextNode = determineForwardNode(request);
 			Request fwd;
-			logger.info("Value returned by forward Node" + nextNode);
 			if (nextNode != null) {
-			Iterator configIt = cfg.getNearest().getNearestNodes().values().iterator();
-			while(configIt.hasNext()){
-				NodeDesc node = (NodeDesc) configIt.next();
-				fwd = ResourceUtil.buildForwardMessage(request, node,HOPCOUNT );
-				if(fwd == null){
-					continue;
-				}
-				logger.info(" FORWARDED STRING " + fwd.toString());
+				fwd = ResourceUtil.buildForwardMessage(request, cfg,HOPCOUNT);
 				NodeDesc nodeDesc = cfg.getNearest().getNearestNodes().get(nextNode);
-				logger.info("HOST "+ nodeDesc.getHost() + " PORT " + nodeDesc.getPort());
-				//ServerConnector serve = new ServerConnector(nodeDesc.getHost(),nodeDesc.getPort());
+				
+//				serve = new ServerConnector(nodeDesc.getHost(),nodeDesc.getPort());
 				if(serve==null){
 					logger.info("Serve is null");
-					serve = new ServerConnector(nodeDesc.getHost(),nodeDesc.getPort());
+					serve = ServerConnector.getInstance(nodeDesc.getHost(), nodeDesc.getPort());
 				}
-				logger.info("SERVER CONNECTOR VALUE is " + serve);
+				logger.info("FWD RESOURCE" + request.getBody().getDoc().getDocName());
+				logger.info(fwd.toString());
 				try {
 					serve.getOutboundServer().put(fwd);
 				} catch (InterruptedException e) {
@@ -102,10 +96,34 @@ public class ForwardResource implements Resource  {
 					e.printStackTrace();
 				}
 				
-			}
+				
+//			Iterator configIt = cfg.getNearest().getNearestNodes().values().iterator();
+//			while(configIt.hasNext()){
+//				NodeDesc node = (NodeDesc) configIt.next();
+//				fwd = ResourceUtil.buildForwardMessage(request, node,HOPCOUNT);
+//				if(fwd == null){
+//					continue;
+//				}
+//				
+//				NodeDesc nodeDesc = cfg.getNearest().getNearestNodes().get(nextNode);
+//				//ServerConnector serve = new ServerConnector(nodeDesc.getHost(),nodeDesc.getPort());
+//				if(serve==null){
+//					logger.info("Serve is null");
+//					serve = new ServerConnector(nodeDesc.getHost(),nodeDesc.getPort());
+//				}
+//				logger.info("SERVER CONNECTOR VALUE is " + serve);
+//				try {
+//					serve.getOutboundServer().put(fwd);
+//				} catch (InterruptedException e) {
+//					
+//					e.printStackTrace();
+//				}
+//				
+				
+//			}
 			return null;
 		} else {
-			logger.info("Next node is null");
+//			logger.info("Next node is null");
 			Response reply = null;
 			// cannot forward the message - no edge or already traveled known
 			// edges
@@ -119,11 +137,7 @@ public class ForwardResource implements Resource  {
 			fb.setNumber(request.getBody().getFinger().getNumber());
 			pb.setFinger(fb.build());
 			rb.setBody(pb.build());
-			
-			
-			
 			reply = rb.build();
-
 			return reply;
 		}
 	}
@@ -141,15 +155,9 @@ public class ForwardResource implements Resource  {
 		List<RoutingPath> paths = request.getHeader().getPathList();
 		
 		if (paths == null || paths.size() == 0) {
-			logger.info("Server conf " + cfg);
 			NodeDesc nd = cfg.getNearest().getNearestNodes().values().iterator().next();
-			
-			logger.info("Returned Value " + nd.getNodeId());
 			return nd.getNodeId();
 		} else {
-			logger.info("Inside else block");
-			logger.info("PATHS " + paths.iterator().next().getNode());
-			// if this server has already seen this message return null
 			for (RoutingPath rp : paths) {
 				for (NodeDesc nd : cfg.getNearest().getNearestNodes().values()) {
 					if (!nd.getNodeId().equalsIgnoreCase(rp.getNode()))
@@ -157,7 +165,6 @@ public class ForwardResource implements Resource  {
 				}
 			}
 		}
-
 		return null;
 	}
 }
