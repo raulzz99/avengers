@@ -3,7 +3,7 @@
         "nearestNodes": {
             "zero": {
                 "nodeId": "zero",
-                "host": "localhost",
+                "host": "192.168.1.22",
 		"nodeType" : "standard",
                 "port": 5570,
                 "mgmtPort": 5670
@@ -11,7 +11,7 @@
             "one": {
                 "nodeId": "one",
 		"nodeType" : "replication",
-                "host": "localhost",
+                "host": "192.168.1.24",
                 "port": 5571,
                 "mgmtPort": 5671
             }
@@ -21,6 +21,7 @@
         "general": {
             "node.id": "two",
             "port": "5572",
+	    "host": "192.168.1.22",
             "port.mgmt": "5672",
             "forward": "poke.server.routing.ForwardResource",
             "storage": "poke.server.storage.InMemoryStorage"
@@ -36,6 +37,12 @@
 	{
             "name": "docadd",
             "id": 20,
+            "clazz": "poke.resources.DocumentResource",
+            "enabled": false
+        },
+	{
+            "name": "docreplicate",
+            "id": 25,
             "clazz": "poke.resources.DocumentResource",
             "enabled": false
         },

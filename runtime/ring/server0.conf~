@@ -11,7 +11,7 @@
             "one": {
                 "nodeId": "one",
 		"nodeType" : "replication",
-                "host": "localhost",
+                "host": "192.168.1.24",
                 "port": 5571,
                 "mgmtPort": 5671
             }
@@ -22,6 +22,7 @@
             "node.id": "zero",
             "port": "5570",
             "port.mgmt": "5670",
+	    "host": "localhost",
             "forward": "poke.server.routing.ForwardResource",
             "storage": "poke.server.storage.InMemoryStorage"
         }

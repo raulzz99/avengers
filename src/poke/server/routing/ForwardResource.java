@@ -94,7 +94,7 @@ public class ForwardResource implements Resource  {
 					serve = ServerConnector.getInstance(nodeDesc.getHost(), nodeDesc.getPort());
 				}
 				logger.info("FWD RESOURCE" + request.getBody().getDoc().getDocName());
-				logger.info(fwd.toString());
+				//logger.info(fwd.toString());
 				try {
 					serve.getOutboundServer().put(fwd);
 				} catch (InterruptedException e) {

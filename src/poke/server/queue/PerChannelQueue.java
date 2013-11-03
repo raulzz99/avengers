@@ -290,14 +290,26 @@ public class PerChannelQueue implements ChannelQueue {
 									sq.enqueueResponse(reply);
 								}
 							}
+							
+							 boolean addresult = false;
+	                            
+	                        if (req.getHeader().getRoutingId() == Header.Routing.METADD || req.getHeader().getRoutingId() == Header.Routing.METAREPLICATE) 
+	                        {
+	                                NameSpace tempns = req.getBody().getSpace();
+	                                
+	                                addresult = ds.addNameSpace(tempns.getName(),tempns.getOwner(),tempns.getIpAddress(),tempns.getStoragePath()); // STORE TO DB
+	                        }
 							String nodeid = cfg.getServer().getGeneral().get("node.id");
 							Iterator confList = cfg.getNearest().getNearestNodes().values().iterator();
+							int count = 0;
 							while(confList.hasNext()){
 //								if (! req.getHeader().getTag().equals("response")) {
-									
+								count++;
+									logger.info("loop count: "+count);
 									NodeDesc node = (NodeDesc)confList.next();
 									
-									if (req.getHeader().getRoutingId() == Header.Routing.DOCADD || req.getHeader().getRoutingId() == Header.Routing.DOCREPLICATE) {
+									if (req.getHeader().getRoutingId() == Header.Routing.DOCADD || req.getHeader().getRoutingId() == Header.Routing.DOCREPLICATE)
+									{
 										
 										//docStorer.addDocument(req.getBody().getSpace().getName(),req.getBody().getDoc());
 										if(node.getNodeType().equals("replication")){
@@ -309,13 +321,15 @@ public class PerChannelQueue implements ChannelQueue {
 											}
 										}
 										
-										if((req.getBody().getDoc().getChunkId()) == (req.getBody().getDoc().getTotalChunk())){
-											if (node.getNodeType().equals("leader")) {
+										if((req.getBody().getDoc().getChunkId()) == (req.getBody().getDoc().getTotalChunk()))
+										{
+											if (node.getNodeType().equals("leader")) 
+											{
 												NameSpace ns = req.getBody().getSpace();
 												NameSpace.Builder nsBuilder = eye.Comm.NameSpace.newBuilder();
 												nsBuilder.setName(ns.getName());
 												nsBuilder.setOwner(ns.getOwner());
-												nsBuilder.setIpAddress(node.getHost());
+												nsBuilder.setIpAddress(cfg.getServer().getGeneral().get("host"));
 												nsBuilder.setStoragePath(path);
 												Request.Builder nsreqBuilder = eye.Comm.Request.newBuilder();
 												Payload.Builder nsplBuilder = eye.Comm.Payload.newBuilder();
@@ -329,21 +343,19 @@ public class PerChannelQueue implements ChannelQueue {
 									}
 									if (req.getHeader().getRoutingId() == Header.Routing.METADD || req.getHeader().getRoutingId() == Header.Routing.METAREPLICATE) 
 									{
-										
-										NameSpace tempns = req.getBody().getSpace();
-										
-										boolean addresult = ds.addNameSpace(tempns.getName(),tempns.getOwner(),tempns.getIpAddress(),tempns.getStoragePath()); // STORE TO DB
+										//NameSpace tempns = req.getBody().getSpace();
+										//boolean addresult = ds.addNameSpace(tempns.getName(),tempns.getOwner(),tempns.getIpAddress(),tempns.getStoragePath()); // STORE TO DB
 										
 										Response reply2 = null;
 										Response.Builder rb = Response.newBuilder();
 										PayloadReply.Builder pb = PayloadReply.newBuilder();
 										
-										if(!addresult){ //SUCCESSFUL ADD TO DB
+										if(addresult){ //SUCCESSFUL ADD TO DB
 											
 											rb.setHeader(ResourceUtil.buildHeaderFrom(req.getHeader(), ReplyStatus.SUCCESS, null));
 											rb.setBody(pb.build());
 											reply2 = rb.build();
-											sq.enqueueResponse(reply2);
+											//sq.enqueueResponse(reply2);
 											
 											if( req.getHeader().getRoutingId() == Header.Routing.METADD ){ // ONLY ACCESSED BY LEADER
 												logger.info("current node doing metadata replication: "+nodeid);
@@ -378,10 +390,9 @@ public class PerChannelQueue implements ChannelQueue {
 //							
 //						}
 					}
-						}
-						
-					} catch (InterruptedException ie) {
-					break;
+				}
+				} catch (InterruptedException ie) {
+				break;
 				} catch (Exception e) {
 					PerChannelQueue.logger.error("Unexpected processing failure", e);
 					break;

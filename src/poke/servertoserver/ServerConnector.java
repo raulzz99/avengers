@@ -125,8 +125,9 @@ public class ServerConnector {
 						if (!handler.send(msg))
 							conn.outboundServer.putFirst(msg);
 
-					} else
-						conn.outboundServer.putFirst(msg);
+					} 
+//					else
+//						conn.outboundServer.putFirst(msg);
 				} catch (InterruptedException ie) {
 					break;
 				} catch (Exception e) {
