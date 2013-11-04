@@ -160,11 +160,11 @@ public void poke(String filename, String owner) throws IOException {
 				
 				//Namespace builder
 				ns = eye.Comm.NameSpace.newBuilder();
-				ns.setName("temp");
+				ns.setName(filename);
 				ns.setOwner(owner);
 				// data to send
 				f = eye.Comm.Document.newBuilder();
-				f.setDocName("temp");
+				f.setDocName(filename);
 				f.setChunkContent(fileinfo);
 				f.setChunkId(i);
 				f.setTotalChunk(TOTAL_CHUNK);
@@ -191,11 +191,11 @@ public void poke(String filename, String owner) throws IOException {
 				
 				//Namespace builder
 				ns = eye.Comm.NameSpace.newBuilder();
-				ns.setName("temp");
+				ns.setName(filename);
 				ns.setOwner(owner);
 				// data to send
 				f = eye.Comm.Document.newBuilder();
-				f.setDocName("temp");
+				f.setDocName(filename);
 				f.setChunkContent(fileinfo);
 				f.setChunkId(i);
 				f.setTotalChunk(TOTAL_CHUNK);
@@ -225,7 +225,40 @@ public void poke(String filename, String owner) throws IOException {
 		}
 	}
 
+public void findDoc(String filename, String owner){
+	NameSpace.Builder ns = null;
+	eye.Comm.Payload.Builder p = null;
+	Request.Builder r = null;
+	eye.Comm.Header.Builder h = null;
+	eye.Comm.Request req = null;
 	
+	ns = eye.Comm.NameSpace.newBuilder();
+	ns.setName(filename);
+	ns.setOwner(owner);
+
+	// payload containing data
+	p = eye.Comm.Payload.newBuilder();
+	r = eye.Comm.Request.newBuilder();
+	p.setSpace(ns.build());
+	r.setBody(p.build());
+	
+	// header with routing info
+	h = Header.newBuilder();
+	h.setOriginator("client");
+	h.setTime(System.currentTimeMillis());
+	h.setRoutingId(eye.Comm.Header.Routing.DOCFIND);
+	
+	r.setHeader(h.build());
+	req = r.build();
+
+	try {
+		// enqueue message
+		outbound.put(req);
+	} catch (InterruptedException e) {
+		logger.warn("Unable to deliver message, queuing");
+	}
+	
+}
 	
 	private void init() {
 		// the queue to support client-side surging

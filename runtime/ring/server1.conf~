@@ -20,8 +20,10 @@
     "server": {
         "general": {
             "node.id": "one",
+	    "nodeType" : "replication"
             "port": "5571",
             "port.mgmt": "5671",
+	    "host": "192.168.1.22",
             "forward": "poke.server.routing.ForwardResource",
             "storage": "poke.server.storage.InMemoryStorage"
         }

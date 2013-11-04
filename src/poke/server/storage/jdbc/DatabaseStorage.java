@@ -28,6 +28,7 @@ import java.util.Properties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import poke.server.conf.NodeDesc;
 import poke.server.storage.Storage;
 
 import com.jolbox.bonecp.BoneCP;
@@ -200,7 +201,7 @@ public class DatabaseStorage implements Storage {
 		
 	}
 
-	public boolean addNameSpace(String name, String owner,String ip,String path) {
+	public boolean addNameSpace(String name, String owner,String ip,String path,int port) {
 	Connection conn = null;
 		try {
 			conn = cpool.getConnection();
@@ -210,7 +211,7 @@ public class DatabaseStorage implements Storage {
 				Statement stmt = conn.createStatement();
 				stmt.executeUpdate("insert into " + sTable_space
 						+ " (Name,Owner,Dest_Node,Storage_Path) values('" + name + "','" + owner
-						+ "','" + ip + "','" + path +"')" ); // do something with the
+						+ "','" + ip + "','" + path +"',"+"','"+port+"')" ); // do something with the
 												// connection.
 			}
 
@@ -295,9 +296,58 @@ public class DatabaseStorage implements Storage {
 	}
 
 	@Override
-	public List<Document> findDocuments(String namespace, Document criteria) {
+	public List<Document> findDocuments(String filename, Document criteria) {
 		// TODO Auto-generated method stub
 		return null;
 	}
+	
+	public NameSpace getMetadata(String filename, String owner) {
+		Connection conn = null;
+		NodeDesc node = null;
+		NameSpace.Builder ns = eye.Comm.NameSpace.newBuilder();
+		try {
+			conn = cpool.getConnection();
+			conn.setTransactionIsolation(Connection.TRANSACTION_REPEATABLE_READ);
+			if (conn != null) {
+				System.out.println("Connection successful!");
+				Statement stmt = conn.createStatement();
+				ResultSet rs = stmt.executeQuery("select Name, Owner, Dest_Node, Storage_path, port from " + sTable_space
+						+ "where Name = '" + filename + "' and Owner = '" + owner +"';");
+				
+				if (rs.next()) {
+					String ip = rs.getString(2);
+					String path = rs.getString(3);
+					int port = rs.getInt(4);
+					ns.setIpAddress(ip);
+					ns.setPort(port);
+					ns.setStoragePath(path);
+				
+				}	
+				
+			}
+			
+		} catch (Exception ex) {
+			ex.printStackTrace();
+			logger.error("failed/exception on creating space " + filename, ex);
+			try {
+				conn.rollback();
+			} catch (SQLException e) {
+			}
 
+			// indicate failure
+		//	return false;
+		} finally {
+			if (conn != null) {
+				try {
+					conn.close();
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+		}
+		return ns.build();
+		//return true;
+	}
 }
+
+

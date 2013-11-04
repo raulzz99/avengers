@@ -102,31 +102,6 @@ public class ForwardResource implements Resource  {
 					e.printStackTrace();
 				}
 				
-				
-//			Iterator configIt = cfg.getNearest().getNearestNodes().values().iterator();
-//			while(configIt.hasNext()){
-//				NodeDesc node = (NodeDesc) configIt.next();
-//				fwd = ResourceUtil.buildForwardMessage(request, node,HOPCOUNT);
-//				if(fwd == null){
-//					continue;
-//				}
-//				
-//				NodeDesc nodeDesc = cfg.getNearest().getNearestNodes().get(nextNode);
-//				//ServerConnector serve = new ServerConnector(nodeDesc.getHost(),nodeDesc.getPort());
-//				if(serve==null){
-//					logger.info("Serve is null");
-//					serve = new ServerConnector(nodeDesc.getHost(),nodeDesc.getPort());
-//				}
-//				logger.info("SERVER CONNECTOR VALUE is " + serve);
-//				try {
-//					serve.getOutboundServer().put(fwd);
-//				} catch (InterruptedException e) {
-//					
-//					e.printStackTrace();
-//				}
-//				
-				
-//			}
 			return null;
 		} else {
 //			logger.info("Next node is null");

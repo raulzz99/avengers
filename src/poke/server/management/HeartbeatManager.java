@@ -196,19 +196,20 @@ public class HeartbeatManager extends Thread {
 				// ignore until we have edges with other nodes
 				if (outgoingHB.size() > 0) {
 					// TODO verify known node's status
-
+					
 					// send my status (hbMgr)
 					GeneratedMessage msg = null;
 					for (HeartbeatData hd : outgoingHB.values()) {
 						// if failed sends exceed threshold, stop sending
 						if (hd.getFailuresOnSend() > HeartbeatData.sFailureToSendThresholdDefault)
 							continue;
-
+						
 						// only generate the message if needed
 						if (msg == null)
 							msg = generateHB();
 
 						try {
+							logger.info(hd.getNodeId()+"IS A GOOD ACTIVE NODE!");
 							hd.channel.write(msg, hd.sa);
 							hd.setLastBeatSent(System.currentTimeMillis());
 							hd.setFailuresOnSend(0);

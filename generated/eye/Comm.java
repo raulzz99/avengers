@@ -490,6 +490,10 @@ public final class Comm {
     // optional string storage_path = 8;
     boolean hasStoragePath();
     String getStoragePath();
+    
+    // optional int32 port = 9;
+    boolean hasPort();
+    int getPort();
   }
   public static final class NameSpace extends
       com.google.protobuf.GeneratedMessage
@@ -710,6 +714,16 @@ public final class Comm {
       }
     }
     
+    // optional int32 port = 9;
+    public static final int PORT_FIELD_NUMBER = 9;
+    private int port_;
+    public boolean hasPort() {
+      return ((bitField0_ & 0x00000100) == 0x00000100);
+    }
+    public int getPort() {
+      return port_;
+    }
+    
     private void initFields() {
       id_ = 0L;
       name_ = "";
@@ -719,6 +733,7 @@ public final class Comm {
       owner_ = "";
       ipAddress_ = "";
       storagePath_ = "";
+      port_ = 0;
     }
     private byte memoizedIsInitialized = -1;
     public final boolean isInitialized() {
@@ -760,6 +775,9 @@ public final class Comm {
       if (((bitField0_ & 0x00000080) == 0x00000080)) {
         output.writeBytes(8, getStoragePathBytes());
       }
+      if (((bitField0_ & 0x00000100) == 0x00000100)) {
+        output.writeInt32(9, port_);
+      }
       getUnknownFields().writeTo(output);
     }
     
@@ -800,6 +818,10 @@ public final class Comm {
       if (((bitField0_ & 0x00000080) == 0x00000080)) {
         size += com.google.protobuf.CodedOutputStream
           .computeBytesSize(8, getStoragePathBytes());
+      }
+      if (((bitField0_ & 0x00000100) == 0x00000100)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt32Size(9, port_);
       }
       size += getUnknownFields().getSerializedSize();
       memoizedSerializedSize = size;
@@ -941,6 +963,8 @@ public final class Comm {
         bitField0_ = (bitField0_ & ~0x00000040);
         storagePath_ = "";
         bitField0_ = (bitField0_ & ~0x00000080);
+        port_ = 0;
+        bitField0_ = (bitField0_ & ~0x00000100);
         return this;
       }
       
@@ -1011,6 +1035,10 @@ public final class Comm {
           to_bitField0_ |= 0x00000080;
         }
         result.storagePath_ = storagePath_;
+        if (((from_bitField0_ & 0x00000100) == 0x00000100)) {
+          to_bitField0_ |= 0x00000100;
+        }
+        result.port_ = port_;
         result.bitField0_ = to_bitField0_;
         onBuilt();
         return result;
@@ -1050,6 +1078,9 @@ public final class Comm {
         }
         if (other.hasStoragePath()) {
           setStoragePath(other.getStoragePath());
+        }
+        if (other.hasPort()) {
+          setPort(other.getPort());
         }
         this.mergeUnknownFields(other.getUnknownFields());
         return this;
@@ -1124,6 +1155,11 @@ public final class Comm {
             case 66: {
               bitField0_ |= 0x00000080;
               storagePath_ = input.readBytes();
+              break;
+            }
+            case 72: {
+              bitField0_ |= 0x00000100;
+              port_ = input.readInt32();
               break;
             }
           }
@@ -1373,6 +1409,27 @@ public final class Comm {
         bitField0_ |= 0x00000080;
         storagePath_ = value;
         onChanged();
+      }
+      
+      // optional int32 port = 9;
+      private int port_ ;
+      public boolean hasPort() {
+        return ((bitField0_ & 0x00000100) == 0x00000100);
+      }
+      public int getPort() {
+        return port_;
+      }
+      public Builder setPort(int value) {
+        bitField0_ |= 0x00000100;
+        port_ = value;
+        onChanged();
+        return this;
+      }
+      public Builder clearPort() {
+        bitField0_ = (bitField0_ & ~0x00000100);
+        port_ = 0;
+        onChanged();
+        return this;
       }
       
       // @@protoc_insertion_point(builder_scope:NameSpace)
@@ -4719,6 +4776,10 @@ public final class Comm {
     // optional int64 remainingHopCount = 9;
     boolean hasRemainingHopCount();
     long getRemainingHopCount();
+    
+    // optional string port = 10;
+    boolean hasPort();
+    String getPort();
   }
   public static final class Header extends
       com.google.protobuf.GeneratedMessage
@@ -5121,6 +5182,38 @@ public final class Comm {
       return remainingHopCount_;
     }
     
+    // optional string port = 10;
+    public static final int PORT_FIELD_NUMBER = 10;
+    private java.lang.Object port_;
+    public boolean hasPort() {
+      return ((bitField0_ & 0x00000100) == 0x00000100);
+    }
+    public String getPort() {
+      java.lang.Object ref = port_;
+      if (ref instanceof String) {
+        return (String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        String s = bs.toStringUtf8();
+        if (com.google.protobuf.Internal.isValidUtf8(bs)) {
+          port_ = s;
+        }
+        return s;
+      }
+    }
+    private com.google.protobuf.ByteString getPortBytes() {
+      java.lang.Object ref = port_;
+      if (ref instanceof String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8((String) ref);
+        port_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+    
     private void initFields() {
       routingId_ = eye.Comm.Header.Routing.FINGER;
       originator_ = "";
@@ -5131,6 +5224,7 @@ public final class Comm {
       path_ = java.util.Collections.emptyList();
       toNode_ = "";
       remainingHopCount_ = 0L;
+      port_ = "";
     }
     private byte memoizedIsInitialized = -1;
     public final boolean isInitialized() {
@@ -5185,6 +5279,9 @@ public final class Comm {
       if (((bitField0_ & 0x00000080) == 0x00000080)) {
         output.writeInt64(9, remainingHopCount_);
       }
+      if (((bitField0_ & 0x00000100) == 0x00000100)) {
+        output.writeBytes(10, getPortBytes());
+      }
       getUnknownFields().writeTo(output);
     }
     
@@ -5229,6 +5326,10 @@ public final class Comm {
       if (((bitField0_ & 0x00000080) == 0x00000080)) {
         size += com.google.protobuf.CodedOutputStream
           .computeInt64Size(9, remainingHopCount_);
+      }
+      if (((bitField0_ & 0x00000100) == 0x00000100)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBytesSize(10, getPortBytes());
       }
       size += getUnknownFields().getSerializedSize();
       memoizedSerializedSize = size;
@@ -5377,6 +5478,8 @@ public final class Comm {
         bitField0_ = (bitField0_ & ~0x00000080);
         remainingHopCount_ = 0L;
         bitField0_ = (bitField0_ & ~0x00000100);
+        port_ = "";
+        bitField0_ = (bitField0_ & ~0x00000200);
         return this;
       }
       
@@ -5456,6 +5559,10 @@ public final class Comm {
           to_bitField0_ |= 0x00000080;
         }
         result.remainingHopCount_ = remainingHopCount_;
+        if (((from_bitField0_ & 0x00000200) == 0x00000200)) {
+          to_bitField0_ |= 0x00000100;
+        }
+        result.port_ = port_;
         result.bitField0_ = to_bitField0_;
         onBuilt();
         return result;
@@ -5521,6 +5628,9 @@ public final class Comm {
         }
         if (other.hasRemainingHopCount()) {
           setRemainingHopCount(other.getRemainingHopCount());
+        }
+        if (other.hasPort()) {
+          setPort(other.getPort());
         }
         this.mergeUnknownFields(other.getUnknownFields());
         return this;
@@ -5623,6 +5733,11 @@ public final class Comm {
             case 72: {
               bitField0_ |= 0x00000100;
               remainingHopCount_ = input.readInt64();
+              break;
+            }
+            case 82: {
+              bitField0_ |= 0x00000200;
+              port_ = input.readBytes();
               break;
             }
           }
@@ -6049,6 +6164,42 @@ public final class Comm {
         remainingHopCount_ = 0L;
         onChanged();
         return this;
+      }
+      
+      // optional string port = 10;
+      private java.lang.Object port_ = "";
+      public boolean hasPort() {
+        return ((bitField0_ & 0x00000200) == 0x00000200);
+      }
+      public String getPort() {
+        java.lang.Object ref = port_;
+        if (!(ref instanceof String)) {
+          String s = ((com.google.protobuf.ByteString) ref).toStringUtf8();
+          port_ = s;
+          return s;
+        } else {
+          return (String) ref;
+        }
+      }
+      public Builder setPort(String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  bitField0_ |= 0x00000200;
+        port_ = value;
+        onChanged();
+        return this;
+      }
+      public Builder clearPort() {
+        bitField0_ = (bitField0_ & ~0x00000200);
+        port_ = getDefaultInstance().getPort();
+        onChanged();
+        return this;
+      }
+      void setPort(com.google.protobuf.ByteString value) {
+        bitField0_ |= 0x00000200;
+        port_ = value;
+        onChanged();
       }
       
       // @@protoc_insertion_point(builder_scope:Header)
@@ -10829,50 +10980,51 @@ public final class Comm {
   static {
     java.lang.String[] descriptorData = {
       "\n\ncomm.proto\"%\n\006Finger\022\016\n\006number\030\001 \002(\005\022\013" +
-      "\n\003tag\030\002 \002(\t\"\224\001\n\tNameSpace\022\n\n\002id\030\001 \001(\003\022\014\n" +
+      "\n\003tag\030\002 \002(\t\"\242\001\n\tNameSpace\022\n\n\002id\030\001 \001(\003\022\014\n" +
       "\004name\030\002 \002(\t\022\014\n\004desc\030\003 \001(\t\022\017\n\007created\030\004 \001" +
       "(\003\022\025\n\rlast_modified\030\005 \001(\003\022\r\n\005owner\030\006 \001(\t" +
       "\022\022\n\nip_address\030\007 \001(\t\022\024\n\014storage_path\030\010 \001" +
-      "(\t\"\224\001\n\014NameValueSet\022)\n\tnode_type\030\001 \002(\0162\026" +
-      ".NameValueSet.NodeType\022\014\n\004name\030\002 \001(\t\022\r\n\005" +
-      "value\030\003 \001(\t\022\033\n\004node\030\004 \003(\0132\r.NameValueSet" +
-      "\"\037\n\010NodeType\022\010\n\004NODE\020\001\022\t\n\005VALUE\020\002\"\224\001\n\010Do" +
-      "cument\022\017\n\007docName\030\001 \001(\t\022\n\n\002id\030\002 \001(\003\022\037\n\010d",
-      "ocument\030\003 \001(\0132\r.NameValueSet\022\024\n\014chunkCon" +
-      "tent\030\004 \001(\014\022\017\n\007chunkId\030\005 \001(\003\022\022\n\ntotalChun" +
-      "k\030\006 \001(\003\022\017\n\007docSize\030\007 \001(\003\"+\n\013DocumentSet\022" +
-      "\034\n\tdocuments\030\001 \003(\0132\t.Document\"*\n\014NameSpa" +
-      "ceSet\022\032\n\006spaces\030\001 \003(\0132\n.NameSpace\")\n\013Rou" +
-      "tingPath\022\014\n\004node\030\001 \002(\t\022\014\n\004time\030\002 \002(\003\"\245\004\n" +
-      "\006Header\022#\n\nrouting_id\030\001 \002(\0162\017.Header.Rou" +
-      "ting\022\022\n\noriginator\030\002 \002(\t\022\013\n\003tag\030\003 \001(\t\022\014\n" +
-      "\004time\030\004 \001(\003\022\'\n\nreply_code\030\005 \001(\0162\023.Header" +
-      ".ReplyStatus\022\021\n\treply_msg\030\006 \001(\t\022\032\n\004path\030",
-      "\007 \003(\0132\014.RoutingPath\022\016\n\006toNode\030\010 \001(\t\022\031\n\021r" +
-      "emainingHopCount\030\t \001(\003\"\354\001\n\007Routing\022\n\n\006FI" +
-      "NGER\020\002\022\t\n\005STATS\020\003\022\020\n\014NAMESPACEADD\020\n\022\021\n\rN" +
-      "AMESPACELIST\020\013\022\023\n\017NAMESPACEUPDATE\020\014\022\023\n\017N" +
-      "AMESPACEREMOVE\020\r\022\n\n\006DOCADD\020\024\022\013\n\007DOCFIND\020" +
-      "\025\022\r\n\tDOCUPDATE\020\026\022\r\n\tDOCREMOVE\020\027\022\023\n\017DOCAD" +
-      "DHANDSHAKE\020\030\022\020\n\014DOCREPLICATE\020\031\022\n\n\006METADD" +
-      "\020\032\022\021\n\rMETAREPLICATE\020\033\"U\n\013ReplyStatus\022\013\n\007" +
-      "SUCCESS\020\001\022\013\n\007FAILURE\020\002\022\n\n\006NOAUTH\020\003\022\016\n\nMI" +
-      "SSINGARG\020\004\022\020\n\014NOCONNECTION\020\005\"U\n\007Payload\022",
-      "\027\n\006finger\030\001 \001(\0132\007.Finger\022\026\n\003doc\030\002 \001(\0132\t." +
-      "Document\022\031\n\005space\030\003 \001(\0132\n.NameSpace\"v\n\014P" +
-      "ayloadReply\022\027\n\006finger\030\001 \001(\0132\007.Finger\022\027\n\004" +
-      "docs\030\002 \003(\0132\t.Document\022\032\n\006spaces\030\003 \003(\0132\n." +
-      "NameSpace\022\030\n\005stats\030\004 \001(\0132\t.Document\":\n\007R" +
-      "equest\022\027\n\006header\030\001 \002(\0132\007.Header\022\026\n\004body\030" +
-      "\002 \002(\0132\010.Payload\"@\n\010Response\022\027\n\006header\030\001 " +
-      "\002(\0132\007.Header\022\033\n\004body\030\002 \002(\0132\r.PayloadRepl" +
-      "y\",\n\tHeartbeat\022\016\n\006nodeId\030\001 \002(\t\022\017\n\007timeRe" +
-      "f\030\002 \002(\003\"\225\001\n\007Network\022\016\n\006nodeId\030\001 \002(\t\022\037\n\006a",
-      "ction\030\002 \002(\0162\017.Network.Action\"Y\n\006Action\022\014" +
-      "\n\010NODEJOIN\020\001\022\r\n\tNODELEAVE\020\002\022\014\n\010NODEDEAD\020" +
-      "\003\022\007\n\003MAP\0207\022\014\n\010ANNOUNCE\0208\022\r\n\010SHUTDOWN\020\347\007\"" +
-      "?\n\nManagement\022\027\n\005graph\030\001 \001(\0132\010.Network\022\030" +
-      "\n\004beat\030\002 \001(\0132\n.HeartbeatB\007\n\003eyeH\001"
+      "(\t\022\014\n\004port\030\t \001(\005\"\224\001\n\014NameValueSet\022)\n\tnod" +
+      "e_type\030\001 \002(\0162\026.NameValueSet.NodeType\022\014\n\004" +
+      "name\030\002 \001(\t\022\r\n\005value\030\003 \001(\t\022\033\n\004node\030\004 \003(\0132" +
+      "\r.NameValueSet\"\037\n\010NodeType\022\010\n\004NODE\020\001\022\t\n\005" +
+      "VALUE\020\002\"\224\001\n\010Document\022\017\n\007docName\030\001 \001(\t\022\n\n",
+      "\002id\030\002 \001(\003\022\037\n\010document\030\003 \001(\0132\r.NameValueS" +
+      "et\022\024\n\014chunkContent\030\004 \001(\014\022\017\n\007chunkId\030\005 \001(" +
+      "\003\022\022\n\ntotalChunk\030\006 \001(\003\022\017\n\007docSize\030\007 \001(\003\"+" +
+      "\n\013DocumentSet\022\034\n\tdocuments\030\001 \003(\0132\t.Docum" +
+      "ent\"*\n\014NameSpaceSet\022\032\n\006spaces\030\001 \003(\0132\n.Na" +
+      "meSpace\")\n\013RoutingPath\022\014\n\004node\030\001 \002(\t\022\014\n\004" +
+      "time\030\002 \002(\003\"\263\004\n\006Header\022#\n\nrouting_id\030\001 \002(" +
+      "\0162\017.Header.Routing\022\022\n\noriginator\030\002 \002(\t\022\013" +
+      "\n\003tag\030\003 \001(\t\022\014\n\004time\030\004 \001(\003\022\'\n\nreply_code\030" +
+      "\005 \001(\0162\023.Header.ReplyStatus\022\021\n\treply_msg\030",
+      "\006 \001(\t\022\032\n\004path\030\007 \003(\0132\014.RoutingPath\022\016\n\006toN" +
+      "ode\030\010 \001(\t\022\031\n\021remainingHopCount\030\t \001(\003\022\014\n\004" +
+      "port\030\n \001(\t\"\354\001\n\007Routing\022\n\n\006FINGER\020\002\022\t\n\005ST" +
+      "ATS\020\003\022\020\n\014NAMESPACEADD\020\n\022\021\n\rNAMESPACELIST" +
+      "\020\013\022\023\n\017NAMESPACEUPDATE\020\014\022\023\n\017NAMESPACEREMO" +
+      "VE\020\r\022\n\n\006DOCADD\020\024\022\013\n\007DOCFIND\020\025\022\r\n\tDOCUPDA" +
+      "TE\020\026\022\r\n\tDOCREMOVE\020\027\022\023\n\017DOCADDHANDSHAKE\020\030" +
+      "\022\020\n\014DOCREPLICATE\020\031\022\n\n\006METADD\020\032\022\021\n\rMETARE" +
+      "PLICATE\020\033\"U\n\013ReplyStatus\022\013\n\007SUCCESS\020\001\022\013\n" +
+      "\007FAILURE\020\002\022\n\n\006NOAUTH\020\003\022\016\n\nMISSINGARG\020\004\022\020",
+      "\n\014NOCONNECTION\020\005\"U\n\007Payload\022\027\n\006finger\030\001 " +
+      "\001(\0132\007.Finger\022\026\n\003doc\030\002 \001(\0132\t.Document\022\031\n\005" +
+      "space\030\003 \001(\0132\n.NameSpace\"v\n\014PayloadReply\022" +
+      "\027\n\006finger\030\001 \001(\0132\007.Finger\022\027\n\004docs\030\002 \003(\0132\t" +
+      ".Document\022\032\n\006spaces\030\003 \003(\0132\n.NameSpace\022\030\n" +
+      "\005stats\030\004 \001(\0132\t.Document\":\n\007Request\022\027\n\006he" +
+      "ader\030\001 \002(\0132\007.Header\022\026\n\004body\030\002 \002(\0132\010.Payl" +
+      "oad\"@\n\010Response\022\027\n\006header\030\001 \002(\0132\007.Header" +
+      "\022\033\n\004body\030\002 \002(\0132\r.PayloadReply\",\n\tHeartbe" +
+      "at\022\016\n\006nodeId\030\001 \002(\t\022\017\n\007timeRef\030\002 \002(\003\"\225\001\n\007",
+      "Network\022\016\n\006nodeId\030\001 \002(\t\022\037\n\006action\030\002 \002(\0162" +
+      "\017.Network.Action\"Y\n\006Action\022\014\n\010NODEJOIN\020\001" +
+      "\022\r\n\tNODELEAVE\020\002\022\014\n\010NODEDEAD\020\003\022\007\n\003MAP\0207\022\014" +
+      "\n\010ANNOUNCE\0208\022\r\n\010SHUTDOWN\020\347\007\"?\n\nManagemen" +
+      "t\022\027\n\005graph\030\001 \001(\0132\010.Network\022\030\n\004beat\030\002 \001(\013" +
+      "2\n.HeartbeatB\007\n\003eyeH\001"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
       new com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner() {
@@ -10892,7 +11044,7 @@ public final class Comm {
           internal_static_NameSpace_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_NameSpace_descriptor,
-              new java.lang.String[] { "Id", "Name", "Desc", "Created", "LastModified", "Owner", "IpAddress", "StoragePath", },
+              new java.lang.String[] { "Id", "Name", "Desc", "Created", "LastModified", "Owner", "IpAddress", "StoragePath", "Port", },
               eye.Comm.NameSpace.class,
               eye.Comm.NameSpace.Builder.class);
           internal_static_NameValueSet_descriptor =
@@ -10940,7 +11092,7 @@ public final class Comm {
           internal_static_Header_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_Header_descriptor,
-              new java.lang.String[] { "RoutingId", "Originator", "Tag", "Time", "ReplyCode", "ReplyMsg", "Path", "ToNode", "RemainingHopCount", },
+              new java.lang.String[] { "RoutingId", "Originator", "Tag", "Time", "ReplyCode", "ReplyMsg", "Path", "ToNode", "RemainingHopCount", "Port", },
               eye.Comm.Header.class,
               eye.Comm.Header.Builder.class);
           internal_static_Payload_descriptor =

@@ -38,5 +38,8 @@ public class ClientPrintListener implements ClientListener {
 			//for (int i = 0, I = msg.getBody().getDocsCount(); i < I; i++)
 				ClientUtil.printNameSpace(msg.getBody().getSpaces(0));
 		}
+		if(msg.getHeader().getRoutingId() == Header.Routing.DOCFIND){
+				ClientUtil.saveFile(msg.getBody().getDocs(0),msg.getBody().getSpaces(0));
+		}
 	}
 }

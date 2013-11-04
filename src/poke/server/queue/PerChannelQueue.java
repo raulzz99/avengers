@@ -15,10 +15,12 @@
  */
 package poke.server.queue;
 
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.RandomAccessFile;
 import java.lang.Thread.State;
 import java.util.Iterator;
@@ -31,8 +33,10 @@ import org.jboss.netty.channel.ChannelFutureListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import poke.client.util.ClientUtil;
 import poke.resources.DocumentResource;
 import poke.server.Server;
+import poke.server.ServerUtil;
 import poke.server.conf.NodeDesc;
 import poke.server.conf.ServerConf;
 import poke.server.resources.Resource;
@@ -248,7 +252,7 @@ public class PerChannelQueue implements ChannelQueue {
 			if (outbound == null)
 				throw new RuntimeException("connection worker detected null queue");
 		}
-
+		
 		@Override
 		public void run() {
 			Channel conn = sq.channel;
@@ -271,6 +275,8 @@ public class PerChannelQueue implements ChannelQueue {
 						Resource rsc = ResourceFactory.getInstance().resourceInstance(req.getHeader());
 						// do we need to route the request?
 						Response reply = null;
+						boolean addresult = false;
+						boolean findresult = false;
 						if (rsc == null) {
 							logger.error("failed to obtain resource for " + req);
 							reply = ResourceUtil.buildError(req.getHeader(), ReplyStatus.FAILURE,
@@ -290,14 +296,52 @@ public class PerChannelQueue implements ChannelQueue {
 									sq.enqueueResponse(reply);
 								}
 							}
-							
-							 boolean addresult = false;
-	                            
+							else if (req.getHeader().getRoutingId() == Header.Routing.DOCFIND){
+								//find file in local system, if true chunk 
+								NameSpace fileInfo = req.getBody().getSpace();
+								String filename = fileInfo.getName();
+								String owner = fileInfo.getOwner();
+								
+								String filepath = System.getProperty("java.io.tmpdir");
+								File f = new File(filepath+File.separator+owner+File.separator+filename);
+								if(f.exists()){
+									
+									ServerUtil.chunk(f,req,sq);
+									findresult = true;
+								}
+								else{
+									if(cfg.getServer().getGeneral().get("nodeType").equals("leader"))
+									{
+										//find metadata 
+										NameSpace tempspace = ds.getMetadata(req.getBody().getSpace().getName(), req.getBody().getSpace().getOwner());
+										
+										NodeDesc node = new NodeDesc();
+										node.setHost(tempspace.getIpAddress());
+										node.setPort(tempspace.getPort());
+										
+										NameSpace.Builder nsBuilder = eye.Comm.NameSpace.newBuilder();
+										Request.Builder nsreqBuilder = eye.Comm.Request.newBuilder();
+										Payload.Builder nsplBuilder = eye.Comm.Payload.newBuilder();
+										
+										nsBuilder.setName(req.getBody().getSpace().getName());
+										nsBuilder.setOwner(req.getBody().getSpace().getOwner());
+										nsBuilder.setIpAddress(req.getBody().getSpace().getIpAddress());
+										nsBuilder.setPort(req.getBody().getSpace().getPort());
+										nsBuilder.setStoragePath(tempspace.getStoragePath());
+									
+										nsplBuilder.setSpace(nsBuilder.build());
+										nsreqBuilder.setHeader(req.getHeader());
+										nsreqBuilder.setBody(nsplBuilder.build());
+	
+										ForwardResource fr = new ForwardResource(req.getHeader().getRoutingId(), node);
+										fr.process(nsreqBuilder.build()); 
+									}
+								}
+							}  
 	                        if (req.getHeader().getRoutingId() == Header.Routing.METADD || req.getHeader().getRoutingId() == Header.Routing.METAREPLICATE) 
 	                        {
 	                                NameSpace tempns = req.getBody().getSpace();
-	                                
-	                                addresult = ds.addNameSpace(tempns.getName(),tempns.getOwner(),tempns.getIpAddress(),tempns.getStoragePath()); // STORE TO DB
+	                                addresult = ds.addNameSpace(tempns.getName(),tempns.getOwner(),tempns.getIpAddress(),tempns.getStoragePath(),tempns.getPort()); // STORE TO DB
 	                        }
 							String nodeid = cfg.getServer().getGeneral().get("node.id");
 							Iterator confList = cfg.getNearest().getNearestNodes().values().iterator();
@@ -330,6 +374,8 @@ public class PerChannelQueue implements ChannelQueue {
 												nsBuilder.setName(ns.getName());
 												nsBuilder.setOwner(ns.getOwner());
 												nsBuilder.setIpAddress(cfg.getServer().getGeneral().get("host"));
+												nsBuilder.setPort(Integer.parseInt(cfg.getServer().getGeneral().get("port")));
+												
 												nsBuilder.setStoragePath(path);
 												Request.Builder nsreqBuilder = eye.Comm.Request.newBuilder();
 												Payload.Builder nsplBuilder = eye.Comm.Payload.newBuilder();
@@ -341,7 +387,29 @@ public class PerChannelQueue implements ChannelQueue {
 											}
 										}
 									}
-									if (req.getHeader().getRoutingId() == Header.Routing.METADD || req.getHeader().getRoutingId() == Header.Routing.METAREPLICATE) 
+									else if (req.getHeader().getRoutingId() == Header.Routing.DOCFIND){
+										if(!findresult){
+											if (node.getNodeType().equals("leader")) {
+												
+												eye.Comm.Header.Builder h = null;
+												Request.Builder nsreqBuilder = eye.Comm.Request.newBuilder();
+												Payload.Builder nsplBuilder = eye.Comm.Payload.newBuilder();
+												h = Header.newBuilder();
+												
+												h.setOriginator(cfg.getServer().getGeneral().get("host"));	//originator IP
+												h.setPort(cfg.getServer().getGeneral().get("port")); 		//originator Port
+												h.setRoutingId(req.getHeader().getRoutingId());
+						
+												nsplBuilder.setSpace(req.getBody().getSpace()); // filename , owner
+												
+												nsreqBuilder.setHeader(h.build());
+												nsreqBuilder.setBody(nsplBuilder.build());
+												ForwardResource fr = new ForwardResource(req.getHeader().getRoutingId(), node);
+												fr.process(nsreqBuilder.build());
+											}
+										}
+									}
+									else if (req.getHeader().getRoutingId() == Header.Routing.METADD || req.getHeader().getRoutingId() == Header.Routing.METAREPLICATE) 
 									{
 										//NameSpace tempns = req.getBody().getSpace();
 										//boolean addresult = ds.addNameSpace(tempns.getName(),tempns.getOwner(),tempns.getIpAddress(),tempns.getStoragePath()); // STORE TO DB

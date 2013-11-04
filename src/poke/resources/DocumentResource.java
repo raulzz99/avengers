@@ -27,6 +27,7 @@ import poke.server.resources.Resource;
 import poke.server.resources.ResourceFactory;
 import poke.server.resources.ResourceUtil;
 import eye.Comm.Finger;
+import eye.Comm.Header;
 import eye.Comm.NameSpace;
 import eye.Comm.PayloadReply;
 import eye.Comm.Request;
@@ -41,14 +42,31 @@ public class DocumentResource implements Resource {
 	@Override
 	public Response process(Request request) {
 		// TODO Auto-generated method stub
-		Response.Builder rb = Response.newBuilder();
-		// metadata
-		rb.setHeader(ResourceUtil.buildHeaderFrom(request.getHeader(), ReplyStatus.SUCCESS, null));
-		// payload
-		PayloadReply.Builder pb = PayloadReply.newBuilder();
-		pb.addSpaces(request.getBody().getSpace());
-		rb.setBody(pb.build());
-		Response reply = rb.build();
+		Response reply = null;
+		
+		if(request.getHeader().getRoutingId() == Header.Routing.DOCADD){
+			Response.Builder rb = Response.newBuilder();
+			// metadata
+			rb.setHeader(ResourceUtil.buildHeaderFrom(request.getHeader(), ReplyStatus.SUCCESS, null));
+			// payload
+			PayloadReply.Builder pb = PayloadReply.newBuilder();
+			pb.addSpaces(request.getBody().getSpace());
+			rb.setBody(pb.build());
+			 reply = rb.build();
+		}
+		else if(request.getHeader().getRoutingId() == Header.Routing.DOCFIND){
+			Response.Builder rb = Response.newBuilder();
+			// metadata
+			rb.setHeader(ResourceUtil.buildHeaderFrom(request.getHeader(), ReplyStatus.SUCCESS, null));
+			// payload
+			PayloadReply.Builder pb = PayloadReply.newBuilder();
+			
+			pb.addSpaces(request.getBody().getSpace());
+			pb.addDocs(request.getBody().getDoc());
+			
+			rb.setBody(pb.build());
+			reply = rb.build();
+		}
 		return reply;
 	}
 

@@ -18,6 +18,7 @@ message NameSpace {
 	optional string owner = 6;
 	optional string ip_address = 7;
 	optional string storage_path = 8;
+	optional int32 port = 9;
 }
 
 message NameValueSet {
@@ -75,7 +76,7 @@ message Header {
     optional string toNode = 8;
     optional int64 remainingHopCount = 9;
     
-
+    optional string port = 10;
     enum Routing {
         FINGER = 2;
         STATS = 3;

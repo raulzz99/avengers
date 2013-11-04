@@ -16,11 +16,8 @@ private void run() {
 	ClientPrintListener listener = new ClientPrintListener("Uploading");
 	connection.addListener(listener);
 	
-	try {
-		connection.poke("temp.txt","ankurthuse");
-	} catch (IOException e) {
-		e.printStackTrace();
-	}
+	//connection.poke("temp.txt","ankurthuse");
+	connection.findDoc("temp", "ankurthuse");
 }
 	
 	public static void main(String[] args) {
